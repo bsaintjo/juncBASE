@@ -28,7 +28,7 @@ if not os.path.exists(SCRIPT):
     print "ERROR: createAS_CountTables.py needs to be in the same directory."
     sys.exit(1)
 
-SHELL = "/bin/tcsh"
+SHELL = "/bin/bash"
 #################
 # END CONSTANTS #
 #################
