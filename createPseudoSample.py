@@ -15,11 +15,11 @@ import os
 import gzip
 import pdb
 
-from helperFunctions import runCmd
+from helperFunctions import launchCMD, runCmd
 #############
 # CONSTANTS #
 #############
-SHELL = "/bin/tcsh"
+SHELL = "/bin/bash"
 
 NUM_GENOME_READS = 10
 #################
@@ -139,7 +139,7 @@ def main():
 
         ln_cmd = "ln -s %s %s/pseudo_junctions.bed" % (bed_file,
                                                        chr2pseudo_dir["all"])
-        os.system(ln_cmd)
+        launchCMD(ln_cmd)
 
     else:
         for chr in chr2pseudo_dir:
@@ -148,7 +148,7 @@ def main():
                                                                         input_dir,
                                                                         chr,
                                                                         chr)
-            os.system(ln_cmd)
+            launchCMD(ln_cmd)
 
     # Link to intron_exon_junction file
     if "all" in chr2pseudo_dir:
@@ -161,7 +161,7 @@ def main():
 
         ln_cmd = "ln -s %s %s/pseudo_intron_exon_junction_counts.txt" % (i_e_file,
                                                                          chr2pseudo_dir["all"])
-        os.system(ln_cmd)
+        launchCMD(ln_cmd)
 
     else:
         for chr in chr2pseudo_dir:
@@ -177,7 +177,7 @@ def main():
             ln_cmd = "ln -s %s %s/pseudo_%s_intron_exon_junction_counts.txt" % (i_e_file,
                                                                                 chr2pseudo_dir[chr],
                                                                                 chr)
-            os.system(ln_cmd)
+            launchCMD(ln_cmd)
                     
 
     # Copy over a little of the genome reads

@@ -244,6 +244,10 @@ def waitForChildren(children_processes, sleeptime=5):
 
         time.sleep(sleeptime)
         
+def launchCMD(CMD):
+    p = Popen(CMD,shell=True)
+    p.wait()
+
 
 #################
 # END FUNCTIONS #	

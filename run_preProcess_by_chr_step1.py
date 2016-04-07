@@ -1,4 +1,4 @@
-#!/broad/software/free/Linux/redhat_5_x86_64/pkgs/python_2.5.4/bin/python
+#!/usr/bin/env python
 # run_preProcess_by_chr_step1.py
 # Author: Angela Brooks
 # Program Completion Date:
@@ -17,8 +17,11 @@ import pysam
 
 from subprocess import Popen, PIPE
 
-from helperFunctions import runCmd, waitForChildren
+from helperFunctions import launchCMD, runCmd, waitForChildren
 from preProcess_getASEventReadCounts_by_chr import getReferences, formatChr
+
+from multiprocessing.pool import ThreadPool
+
 #############
 # CONSTANTS #
 #############
@@ -122,6 +125,9 @@ def main():
 
     ctr = 0
     children = []
+    
+    tp = ThreadPool(num_processes)
+
     for line in input_file:
         line = formatLine(line)
 
@@ -180,26 +186,15 @@ def main():
 
         ctr += 1
 
-        if ctr % num_processes == 0:
-            print cmd
-#            runCmd(cmd, SHELL, True)
-            sys.stdout.flush()
-            p = Popen(cmd, shell=True, executable=SHELL)
-            children.append(p)
-
-            waitForChildren(children)
-
-            children = []
-        else:
-            print cmd
-            sys.stdout.flush()
-            p = Popen(cmd, shell=True, executable=SHELL)
-            children.append(p)
+        print(cmd)
+        sys.stdout.flush()
+        tp.apply_async(launchCMD, (cmd,))
 
    
     # Finish the last of the jobs
-    waitForChildren(children) 
 
+    tp.close()
+    tp.join()
     sys.stdout.flush()
     sys.exit(0)
 
