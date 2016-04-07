@@ -17,9 +17,7 @@ import os
 import pdb
 
 from subprocess import Popen
-from helperFunctions import launchCMD, runCmd, runLSF
-
-from multiprocessing.pool import ThreadPool
+from helperFunctions import runCmd, runLSF
 
 from createPseudoSample import getChr
 #############
@@ -292,8 +290,6 @@ def main():
 
     by_chr = options.by_chr
 
-    tp = ThreadPool(num_processes)
-
     if by_chr:
         chr_list = getChr(input_dir)       
         
@@ -409,10 +405,11 @@ def main():
                 if nice:
                     cmd = "nice " + cmd
 
-                print(cmd)
-                sys.stdout.flush()
-                tp.apply_async(launchCMD, (cmd,))
-
+                if ctr % num_processes == 0:
+                    os.system(cmd)
+                else:
+                    print cmd
+                    Popen(cmd, shell=True, executable=SHELL)
 
     else:
         ctr = 0
@@ -505,8 +502,8 @@ def main():
                 print cmd
                 Popen(cmd, shell=True, executable=SHELL)
             
-    tp.close()
-    tp.join()			
+        
+			
     sys.exit(0)
 
 ############
