@@ -14,7 +14,9 @@ import os
 import pdb
 
 from subprocess import Popen
-from helperFunctions import runLSF
+from helperFunctions import launchCMD, runLSF
+
+from multiprocessing.pool import ThreadPool
 
 from createPseudoSample import getChr
 #############
@@ -159,6 +161,8 @@ def main():
     chr_list = getChr(input_dir)
 
     ctr = 0
+
+    tp = ThreadPool(num_processes)
     for this_chr in chr_list:
         files_are_present = False
         expected_out_files = ["%s/tmp_createAS_CountTables_%s_AS_exclusion_inclusion_counts.txt" % (root_dir, this_chr),
@@ -213,12 +217,12 @@ def main():
                    "hour")
             continue
 
-        if ctr % num_processes == 0:
-            os.system(cmd)
-        else:
-            print cmd
-            Popen(cmd, shell=True, executable=SHELL)
+        print(cmd)
+        sys.stdout.flush()
+        tp.apply_async(launchCMD, (cmd,))
 
+    tp.close()
+    tp.join()
     sys.exit(0)
 
 ############
