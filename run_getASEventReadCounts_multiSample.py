@@ -1,4 +1,4 @@
-#!/lab/64/bin/python
+#!/usr/bin/env python
 # run_getASEventReadCounts_multiSample.py
 # Author: Angela Brooks
 # Program Completion Date:
