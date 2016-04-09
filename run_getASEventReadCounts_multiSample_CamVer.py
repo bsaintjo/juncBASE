@@ -17,9 +17,9 @@ import os
 import pdb
 
 from subprocess import Popen
-from helperFunctions import runCmd, runLSF
+from helperFunctions import runCmd, runLSF, launchCMD
 
-from  multiprocessing.pool import ThreadPool
+from multiprocessing.pool import ThreadPool
 
 from createPseudoSample import getChr
 #############
@@ -291,12 +291,14 @@ def main():
     check = options.check
 
     by_chr = options.by_chr
+    
 
+    tp = ThreadPool(num_processes)
     if by_chr:
         chr_list = getChr(input_dir)       
         
         ctr = 0
-        tp = ThreadPool(num_processes)
+        process_list = []
         for samp in samples:
             # Check for output subdirectory
             samp_dir = output_dir + "/" + samp
@@ -307,8 +309,9 @@ def main():
                 chr_dir = samp_dir + "/" + samp + "_" + chr
                 if not os.path.exists(chr_dir):
                     os.mkdir(chr_dir)
-
-#                os.chdir(chr_dir)
+                
+                #os.chdir(chr_dir)
+                
 
                 expected_out_file = "%s_%s_finished.txt" % (samp, chr)
 
@@ -407,12 +410,29 @@ def main():
 
                 if nice:
                     cmd = "nice " + cmd
-                
+
+
                 print(cmd)
-                sys.stdout.flush()
-                print(chr_dir)
-                tp.apply_async(launchCMD_better, (cmd,chr_dir))
- 
+                
+                if len(process_list) == num_processes:
+                    second_list = []
+                    for i in range(len(process_list)):
+                        second_list.append(Popen(process_list[i],shell=True,cwd=process2_list[i]))
+
+                    for i in second_list:
+                        i.wait()
+                    process_list = []
+                    process2_list = []
+                else:
+                    
+                    process_list.append(cmd)
+                    process2_list.append(chr_dir)
+                #sys.stdout.flush()
+                #tp.apply_async(launchCMD, (cmd,))
+               
+
+
+
 #                if ctr % num_processes == 0:
 #                    os.system(cmd)
 #                else:
@@ -427,6 +447,7 @@ def main():
             if not os.path.exists(full_output_dir):
                 os.mkdir(full_output_dir)
 
+            this_dir = full_output_dir
             os.chdir(full_output_dir)
 
             expected_out_file = "%s_finished.txt" % samp
@@ -503,18 +524,17 @@ def main():
 
             if nice:
                 cmd = "nice " + cmd
-            #print(cmd)
-            # sys.stdout.flush()
-            #  tp.apply_async(launchCMD, (cmd,))
-             
-            #  if ctr % num_processes == 0:
-            #      os.system(cmd)
-            #  else:
-            #      print cmd
-            #      Popen(cmd, shell=True, executable=SHELL)
+
+            print(cmd)
+            #sys.stdout.flush()
+            #tp.apply_async(launchCMD, (cmd,))
+           # if ctr % num_processes == 0:
+           #     os.system(cmd)
+           # else:
+           #     print cmd
+           #     Popen(cmd, shell=True, executable=SHELL)
             
-        
-    tp.close()
+    tp.close()    
     tp.join()			
     sys.exit(0)
 
@@ -553,11 +573,6 @@ def getSampleNames(samples_option):
         samples.append(lineList[0]) 
 
     return samples
-
-def launchCMD_better(CMD, run_in_dir):
-    print(run_in_dir)
-    p = Popen(CMD,shell=True, cwd=run_in_dir)
-    p.wait()
     
 #################
 # END FUNCTIONS #	
