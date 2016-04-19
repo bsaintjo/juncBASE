@@ -308,7 +308,7 @@ def main():
                 if not os.path.exists(chr_dir):
                     os.mkdir(chr_dir)
 
-#                os.chdir(chr_dir)
+                os.chdir(chr_dir)
 
                 expected_out_file = "%s_%s_finished.txt" % (samp, chr)
 
