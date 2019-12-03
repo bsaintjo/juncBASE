@@ -17,11 +17,8 @@ import pdb
 import os
 import pickle
 
-import rpy2.robjects as robjects
-
-
 from getASEventReadCounts import isAnnotated, getAnnotatedIntronCoords, getAnnotatedExonCoords, getAllEventStr, findAdjacentSharedRegion
-r = robjects.r
+
 #############
 # CONSTANTS #
 #############
@@ -284,8 +281,6 @@ def main():
 
 # No longer doing p-value test here
 #   # Adjust the pvalues
-#   adj_pvals_rVec = robjects.r['p.adjust'](robjects.FloatVector(combined_pvals), 
-#                      method)
 
 #   adj_pvals = []
 

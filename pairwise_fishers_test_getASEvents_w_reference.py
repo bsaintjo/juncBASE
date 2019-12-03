@@ -16,10 +16,17 @@ import optparse
 import pdb
 import os
 
-import rpy2.robjects as robjects
+import robustats
+import statistics
+import scipy
+from statsmodels.stats import multitest
+
+# TODO delete
+# import rpy2.robjects as robjects
 from helperFunctions import updateDictOfLists
 from getASEventReadCounts import convertCoordStr, getAD_AA_isoform_lengths, determineAltStartOrEnd
-r = robjects.r
+# r = robjects.r
+
 #############
 # CONSTANTS #
 #############
@@ -361,11 +368,13 @@ def main():
 
     event_sum = open("%s_event_sum.txt" % out_prefix, "w")
 
-    method = options.method
-    if method != "BH" and method != "bonferroni":
+    if options.method != "BH" and options.method != "bonferroni":
         print "Wrong method indicated."
         opt_parser.print_help()
         sys.exit(1)
+
+    method_map = {"BH": "fdr_h", "bonferroni": "bonferroni"}
+    method = method_map[options.method]
 
     # {event_type:[pval]}
     event_type2pvals = {}
@@ -521,11 +530,13 @@ def main():
             else:
                 event2col2idx[event] = {j:cur_len2}
 
-            raw_pval = robjects.r['fisher.test'](r.matrix(robjects.IntVector([col1_excl,
-                                                                              col1_incl,
-                                                                              col2_excl,
-                                                                              col2_incl]),
-                                                                              nrow=2))[0][0]
+            # raw_pval = robjects.r['fisher.test'](r.matrix(robjects.IntVector([col1_excl,
+            #                                                                   col1_incl,
+            #                                                                   col2_excl,
+            #                                                                   col2_incl]),
+            #                                                                   nrow=2))[0][0]
+            _, raw_pval = scipy.stats.fisher_exact([[col1_excl, col1_incl],
+                                              [col2_excl, col2_incl]])
 
             event_type2pvals[event_type].append(raw_pval)
 
@@ -684,17 +695,23 @@ def main():
             else:
                 event2col2idx[event] = {j:cur_len2}
 
-            left_pval = robjects.r['fisher.test'](r.matrix(robjects.IntVector([left_col1_excl, 
-                                                                               left_col1_incl,
-                                                                               left_col2_excl,
-                                                                               left_col2_incl]),
-                                                           nrow=2))[0][0] 
+            # TODO delete
+            # left_pval = robjects.r['fisher.test'](r.matrix(robjects.IntVector([left_col1_excl, 
+            #                                                                    left_col1_incl,
+            #                                                                    left_col2_excl,
+            #                                                                    left_col2_incl]),
+            #                                                nrow=2))[0][0] 
+            _, left_pval = scipy.stats.fisher_exact([[left_col1_excl, left_col1_incl],
+                                               [left_col2_excl, left_col2_incl]])
             
-            right_pval = robjects.r['fisher.test'](r.matrix(robjects.IntVector([right_col1_excl, 
-                                                                                right_col1_incl,
-                                                                                right_col2_excl,
-                                                                                right_col2_incl]),
-                                                           nrow=2))[0][0] 
+            # TODO Delete
+            # right_pval = robjects.r['fisher.test'](r.matrix(robjects.IntVector([right_col1_excl, 
+            #                                                                     right_col1_incl,
+            #                                                                     right_col2_excl,
+            #                                                                     right_col2_incl]),
+            #                                                nrow=2))[0][0] 
+            _, right_pval = scipy.stats.fisher_exact([[right_col1_excl, right_col1_incl],
+                                                [right_col2_excl, right_col2_incl]])
 
             combined_pval = (left_pval + right_pval) - left_pval * right_pval
 
@@ -722,14 +739,19 @@ def main():
     event_type2col2adjusted_pvals = {}
 
     for event_type in event_type2pvals:
-        event_type2adjusted_pvals[event_type] = robjects.r['p.adjust'](robjects.FloatVector(event_type2pvals[event_type]),
-                                                                       method) 
+        # TODO delete
+        # event_type2adjusted_pvals[event_type] = robjects.r['p.adjust'](robjects.FloatVector(event_type2pvals[event_type]),
+        #                                                                method) 
+
+        event_type2adjusted_pvals[event_type] = list(multitest.multipletests(event_type2pvals[event_type], method=method)[1])
     
     for event_type in event_type2col2pvals:
         event_type2col2adjusted_pvals[event_type] = {}
         for col in event_type2col2pvals[event_type]:
-            event_type2col2adjusted_pvals[event_type][col] = robjects.r['p.adjust'](robjects.FloatVector(event_type2col2pvals[event_type][col]),
-                                                                                    method)
+            # TODO delete
+            # event_type2col2adjusted_pvals[event_type][col] = robjects.r['p.adjust'](robjects.FloatVector(event_type2col2pvals[event_type][col]),
+            #                                                                         method)
+            event_type2col2adjusted_pvals[event_type][col] = list(multitest.multipletests(event_type2col2pvals[event_type][col], method=method)[1])
 
     # Now go through all events and only consider those that are signficant
     psi_out.write(header + "\n")
@@ -1085,14 +1107,21 @@ def recalculateRefPSI(col2psi_str, col2total_count, col2weights):
             weights.append(col2weights[col-1])
 
     if col2weights:
-        median_psi = r['weighted.median'](robjects.FloatVector(psi_vals), 
-                                          robjects.FloatVector(weights))[0]
-        median_total = int(round(r['weighted.median'](robjects.IntVector(total_vals),                                
-                                                      robjects.FloatVector(weights))[0]))
+        # TODO Delete
+        # TODO Pretty sure int(round(x)) == round(x)
+        # median_psi = r['weighted.median'](robjects.FloatVector(psi_vals), 
+        #                                   robjects.FloatVector(weights))[0]
+        median_psi = robustats.weighted_median(psi_vals, weights)
+
+        # median_total = int(round(r['weighted.median'](robjects.IntVector(total_vals),                                
+        #                                               robjects.FloatVector(weights))[0]))
+        median_total = int(round(robustats.weighted_median(total_vals, weights)))
     else:
-        median_psi = r['median'](robjects.FloatVector(psi_vals))[0]
+        # median_psi = r['median'](robjects.FloatVector(psi_vals))[0]
+        median_psi = statistics.median(psi_vals)
         try:
-            median_total = int(round(r['median'](robjects.IntVector(total_vals))[0]))
+            # median_total = int(round(r['median'](robjects.IntVector(total_vals))[0]))
+            median_total = int(round(statistics.median(total_vals)))
         except:
             pdb.set_trace()
 
@@ -1113,10 +1142,13 @@ def recalculateRefPSI_list(psi_list, col2weights):
             weights.append(col2weights[i-1])
 
     if col2weights:
-        median_psi = r['weighted.median'](robjects.FloatVecotr(vals),
-                                          robjects.FloatVector(weights))[0]
+        # TODO delete
+        # median_psi = r['weighted.median'](robjects.FloatVecotr(vals),
+        #                                   robjects.FloatVector(weights))[0]
+        median_psi = robustats.weighted_median(vals, weights)
     else:
-        median_psi = r['median'](robjects.FloatVector(vals))[0]
+        # median_psi = r['median'](robjects.FloatVector(vals))[0]
+        median_psi = statistics.median(vals)
 
     return "%.2f" % median_psi
 #################

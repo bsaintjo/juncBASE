@@ -12,9 +12,9 @@ import sys
 import optparse 
 import pdb
 
-import rpy2.robjects as robjects
+import scipy.stats as stats
+from statsmodels.stats import multitest
 
-r = robjects.r
 #############
 # CONSTANTS #
 #############
@@ -85,11 +85,14 @@ def main():
 
     file = open(options.infile)
 
-    method = options.method
-    if method != "BH" and method != "bonferroni":
+    if options.method != "BH" or options.method != "bonferroni":
         print "Wrong correction method."
         opt_parser.print_help()
         sys.exit(1)
+
+    # Map correction names into those used by statsmodels
+    method_map = {"BH": "fdr_h", "bonferroni": "bonferroni"}
+    method = method_map[options.method]
 
     filter = options.filter
 
@@ -122,23 +125,20 @@ def main():
         B1 = int(line_list[-2])
         B2 = int(line_list[-1])
 
-        # I sort of get why this indexing works, but the robjects is still
-        # unclear to me.  The first [0] indexes to the p_value of the fisher
-        # test.  The next[0] then gets the value in the Rvector
-        p_vals[i] = robjects.r['fisher.test'](r.matrix(robjects.IntVector([A1,A2, B1, B2]), 
-                                              nrow=2))[0][0]
+        p_vals[i] = stats.fisher_exact([[A1, A2], [B1, B2]])[1]
 
         
     # Get adjusted p_values with Benjamini Hochberg method
-    adj_p_vals_rVec = robjects.r['p.adjust'](robjects.FloatVector(p_vals),
-                                             method) 
+    adj_p_vals_rVec = list(multitest.multipletests(p_vals, method=method)[1])
 
     adj_p_vals = []
     
+    # TODO pretty sure I can delete this and just use the adj_p_val_rVec
     for p_val in adj_p_vals_rVec:
         adj_p_vals.append(p_val)
 
     # Print new results, sorted from lowest p to highest p
+    # TODO use multipletests to get the sorted values with returnsorted param
     adj_p_vals_sort = list(adj_p_vals)
     adj_p_vals_sort.sort()
 

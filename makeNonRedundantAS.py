@@ -14,7 +14,7 @@ import pdb
 from helperFunctions import coordsOverlap
 from getASEventReadCounts import convertCoordStr
 
-import rpy2.robjects as robjects
+from scipy.stats import median_absolute_deviation
 #############
 # CONSTANTS #
 #############
@@ -227,7 +227,7 @@ def get_mad(line_list):
 
     vals = map(float, vals_str) 
 
-    abs_mad_val = abs(robjects.r['mad'](robjects.FloatVector(vals))[0])
+    abs_mad_val = abs(median_absolute_deviation(vals))
 
     # Since the lowest p-value is supposed to be used for selecting the
     # non-redundant set of events, the negative of the larget MAD value will
