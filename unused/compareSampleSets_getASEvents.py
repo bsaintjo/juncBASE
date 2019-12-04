@@ -15,6 +15,10 @@ import sys
 import optparse 
 import pdb
 import os
+import numpy as np
+import statistics
+import scipy.stats as scistats
+from statsmodels.stats import multitest
 
 import rpy2.robjects as robjects
 import rpy2.robjects.lib.ggplot2 as ggplot2
@@ -236,24 +240,22 @@ def main():
     
     all_psi_output = open(options.all_psi_output, "w")
 
-
-    method = options.mt_method
-    if method != "BH" and method != "bonferroni":
+    if options.method != "BH" and options.method != "bonferroni":
         print "Wrong method indicated."
         opt_parser.print_help()
         sys.exit(1)
 
-    which_test = options.which_test 
+    method_map = {"BH": "fdr_h", "bonferroni": "bonferroni"}
+    method = method_map[options.method]
+
+    which_test = options.which_test
     if which_test != "Wilcoxon" and which_test != "t-test":
         print "Wrong method indicated."
         opt_parser.print_help()
         sys.exit(1)
 
-    if which_test == "Wilcoxon":
-        which_test = "wilcox.test"
-    if which_test == "t-test":
-        which_test = "t.test"
-
+    test_map = {"Wilcoxon": scistats.wilcoxon, "t-test": scistats.ttest_ind}
+    which_test = test_map[which_test]
 
     idx2sample = {}
 
@@ -391,8 +393,8 @@ def main():
             continue
 
         psi_vals_cur_len = len(event_type2PSI_vals_4_set[event_type])
-        event_type2PSI_vals_4_set[event_type].append((robjects.r['median'](robjects.FloatVector(set1_psis))[0],
-                                                      robjects.r['median'](robjects.FloatVector(set2_psis))[0]))
+        event_type2PSI_vals_4_set[event_type].append((statistics.median(set1_psis),
+                                                      statistics.median(set2_psis)))
 
 
         event2PSI_val_idx[event] = psi_vals_cur_len
@@ -417,12 +419,11 @@ def main():
         cur_len = len(event_type2pvals[event_type])
 
         try: 
-            raw_pval = robjects.r[which_test](robjects.FloatVector(set1_psis),
-                                          robjects.FloatVector(set2_psis))[2][0]
+            _, raw_pval = which_test(set1_psis, set2_psis)
         except:
             continue
 
-        if robjects.r["is.nan"](raw_pval)[0]:
+        if np.isnan(raw_pval):
             continue
 
         event_type2pvals[event_type].append(raw_pval)
@@ -505,15 +506,13 @@ def main():
             cur_len = len(event_type2pvals["intron_retention"])
 
             try:
-                left_pval = robjects.r[which_test](robjects.FloatVector(set1_psis_left),
-                                                   robjects.FloatVector(set2_psis_left))[2][0]
+                left_pval = which_test(set1_psis_left, set2_psis_left)[1]
                         
-                right_pval = robjects.r[which_test](robjects.FloatVector(set1_psis_right),
-                                                    robjects.FloatVector(set2_psis_right))[2][0]
+                right_pval = which_test(set1_psis_right, set2_psis_right)[1]
             except:
                 continue
 
-            if robjects.r["is.nan"](left_pval)[0] or robjects.r["is.nan"](right_pval)[0]:
+            if np.isnan(left_pval) or np.isnan(right_pval):
                 continue
             else:
                 combined_pval = (left_pval + right_pval) - left_pval * right_pval
@@ -533,8 +532,7 @@ def main():
         if as_only:
             event_type2adjusted_pvals[event_type] = list(event_type2pvals[event_type])
         else:
-            event_type2adjusted_pvals[event_type] = robjects.r['p.adjust'](robjects.FloatVector(event_type2pvals[event_type]),
-                                                                           method) 
+            event_type2adjusted_pvals[event_type] = list(multitest.multipletests(event_type2pvals[event_type], method=method)[1])
     
     # Now go through all events and print out pvals
     all_psi_output.write(header)

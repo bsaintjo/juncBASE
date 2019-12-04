@@ -12,24 +12,23 @@
 """
 
 import sys
-import optparse 
+import optparse
 import pdb
 import os
 import random
 
-import rpy2.robjects as robjects
-from rpy2.robjects.packages import importr
-grdevices = importr('grDevices')
+import numpy as np
+import statistics
+import scipy.stats as scistats
+from statsmodels.stats import multitest
+import pandas as pd
+import plotnine as pn
+
+# TODO trace all instances and delete
+grdevices = None
 
 from helperFunctions import updateDictOfLists
 
-#import numpy as np
-#import matplotlib.pyplot as plt
-#import matplotlib.mlab as mlab
-
-r = robjects.r
-# Suppresses warnings
-robjects.r["options"](warn=-1)
 #############
 # CONSTANTS #
 #############
@@ -244,10 +243,14 @@ def main():
     if options.samp2batch_file:
         samp2batch = parseBatchFile(options.samp2batch_file)
 
-    html_out_dir = options.html_dir
+    # TODO Disable HTML output for now
+    html_out_dir = options.html_out_dir
+    if html_out_dir:
+        print("HTML output has been disabled at this time", file=sys.stderr)
+        html_out_dir = False
+
     html_out_table_name = None
     if html_out_dir:
-        exec "import rpy2.robjects.lib.ggplot2 as ggplot2" in globals()
         html_out_dir = formatDir(html_out_dir)
         if not os.path.exists(html_out_dir):
             os.mkdir(html_out_dir)
@@ -293,23 +296,23 @@ def main():
     
     all_psi_output = open(options.all_psi_output, "w")
 
-
     method = options.mt_method
     if method != "BH" and method != "bonferroni":
         print "Wrong method indicated."
         opt_parser.print_help()
         sys.exit(1)
 
-    which_test = options.which_test 
+    method_map = {"BH": "fdr_h", "bonferroni": "bonferroni"}
+    method = method_map[method]
+
+    which_test = options.which_test
     if which_test != "Wilcoxon" and which_test != "t-test":
         print "Wrong method indicated."
         opt_parser.print_help()
         sys.exit(1)
 
-    if which_test == "Wilcoxon":
-        which_test = "wilcox.test"
-    if which_test == "t-test":
-        which_test = "t.test"
+    test_map = {"Wilcoxon": scistats.wilcoxon, "t-test": scistats.ttest_ind}
+    which_test = test_map[which_test]
 
 
     idx2sample = {}
@@ -476,8 +479,8 @@ def main():
             continue
 
         psi_vals_cur_len = len(event_type2PSI_vals_4_set[event_type])
-        event_type2PSI_vals_4_set[event_type].append((robjects.r['median'](robjects.FloatVector(set1_psis))[0],
-                                                      robjects.r['median'](robjects.FloatVector(set2_psis))[0]))
+        event_type2PSI_vals_4_set[event_type].append((statistics.median(set1_psis),
+                                                      statistics.median(set2_psis)))
 
 
         event2PSI_val_idx[event] = psi_vals_cur_len
@@ -509,17 +512,15 @@ def main():
                                           batch2setLabels,
                                           batch2len)
 
-                this_stat = robjects.r[which_test](robjects.FloatVector(set1_psis),
-                                                   robjects.FloatVector(set2_psis))[0][0]
+                this_stat = which_test(set1_psis, set2_psis)[0]
 
                 raw_pval = get_emp_pval(null_dist, this_stat)
             else:
-                raw_pval = robjects.r[which_test](robjects.FloatVector(set1_psis),
-                                                  robjects.FloatVector(set2_psis))[2][0]
+                raw_pval = which_test(set1_psis, set2_psis)[1]
         except:
             continue
 
-        if robjects.r["is.nan"](raw_pval)[0]:
+        if np.isnan(raw_pval):
             continue
 
         event_type2pvals[event_type].append(raw_pval)
@@ -628,27 +629,23 @@ def main():
                                               which_test,
                                               batch2setLabels,
                                               batch2len)
-                    this_stat = robjects.r[which_test](robjects.FloatVector(set1_psis),
-                                                       robjects.FloatVector(set2_psis))[0][0]
+                    this_stat = which_test(set1_psis, set2_psis)[0]
                     left_pval = get_emp_pval(null_dist, this_stat)
 
                     null_dist = get_null_dist(right_total_counts, right_all_psis,
                                               which_test,
                                               batch2setLabels,
                                               batch2len)
-                    this_stat = robjects.r[which_test](robjects.FloatVector(set1_psis),
-                                                       robjects.FloatVector(set2_psis))[0][0]
+                    this_stat = which_test(set1_psis, set2_psis)[0]
                     right_pval = get_emp_pval(null_dist, this_stat)
                 else:
-                    left_pval = robjects.r[which_test](robjects.FloatVector(set1_psis_left),
-                                                       robjects.FloatVector(set2_psis_left))[2][0]
+                    left_pval = which_test(set1_psis_left, set2_psis_left)[1]
                         
-                    right_pval = robjects.r[which_test](robjects.FloatVector(set1_psis_right),
-                                                        robjects.FloatVector(set2_psis_right))[2][0]
+                    right_pval = which_test(set1_psis_right, set2_psis_right)[1]
             except:
                 continue
 
-            if robjects.r["is.nan"](left_pval)[0] or robjects.r["is.nan"](right_pval)[0]:
+            if np.isnan(left_pval) or np.isnan(right_pval):
                 continue
             else:
                 combined_pval = (left_pval + right_pval) - left_pval * right_pval
@@ -668,8 +665,7 @@ def main():
         if as_only:
             event_type2adjusted_pvals[event_type] = list(event_type2pvals[event_type])
         else:
-            event_type2adjusted_pvals[event_type] = robjects.r['p.adjust'](robjects.FloatVector(event_type2pvals[event_type]),
-                                                                           method) 
+            event_type2adjusted_pvals[event_type] = list(multitest.multipletests(event_type2pvals[event_type], method=method)[1])
     
     # Now go through all events and print out pvals
     all_psi_output.write(header)
@@ -811,8 +807,6 @@ def get_emp_pval(null_dist, this_stat):
     """
     Two-tailed emp_pval
     """
-#   mu = robjects.r["mean"](robjects.FloatVector(null_dist))[0]
-#   sd = robjects.r["sd"](robjects.FloatVector(null_dist))[0]
 
     high_ctr = 0
     low_ctr = 0
@@ -855,8 +849,9 @@ def get_null_dist(total_counts, all_psis, which_test, batch2setLabels, batch2len
         for idx in this_idx2sample_set:
             if all_psis[idx] == NA:
                 continue
-            this_incl = float(robjects.r["rbinom"](1,total_counts[idx],
-                                                   all_psis[idx]/100)[0])
+            this_incl = scistats.binom.rvs(n=total_counts[idx],
+                                           p=all_psis[idx]/100,
+                                           size=1)
             this_psi = this_incl/total_counts[idx]
 
             if this_idx2sample_set[idx] == 0:
@@ -864,8 +859,7 @@ def get_null_dist(total_counts, all_psis, which_test, batch2setLabels, batch2len
             else:
                 this_set2_psis.append(this_psi)
 
-        stats.append(robjects.r[which_test](robjects.FloatVector(this_set1_psis),
-                                            robjects.FloatVector(this_set2_psis))[0][0])
+        stats.append(which_test(this_set1_psis, this_set2_psis)[0])
     return stats
 
 def getPSI_sample_sum(excl_incl_ct_str, sum_thresh):
@@ -950,25 +944,13 @@ def makePlot(grdevices, plotName, samp_set1_vals, samp_set2_vals,
 
     data_vector = samp_set1_vals + samp_set2_vals
     
-    dframe = robjects.DataFrame({"sample":robjects.StrVector(samp_vector),
-                                 "value":robjects.FloatVector(data_vector)})
+    dframe = pd.DataFrame(list(zip(samp_vector, data_vector)), columns=["sample", "value"])
 
-    gp = ggplot2.ggplot(dframe)
+    gg = pn.ggplot(dframe, pn.aes(x="sample", y="value")) + pn.geom_jitter(position="jitter", width=0.2, height=0.01) + pn.coord_cartesian(ylim=(0, 100)) + pn.theme_bw()
 
-    pp = gp + \
-     ggplot2.aes_string(x="sample", y='value') + \
-     ggplot2.geom_jitter(position=ggplot2.position_jitter(width=0.2, height=0.01)) +\
-     ggplot2.coord_cartesian(ylim=robjects.IntVector([0,100])) +\
-     ggplot2.theme_bw()
+    # TODO Just infer format from plotName
+    gg.save(filename=plotName, format=image_file_type)
 
-#     ggplot2.geom_boxplot(stat="identity") +\
-
-    if image_file_type == "pdf":
-        grdevices.pdf(file=plotName)
-    else:
-        grdevices.png(file=plotName, width=512, height=512)
-    pp.plot()
-    grdevices.dev_off()
 
 def parseBatchFile(batch_file_name):
     samp2batch = {}
@@ -987,6 +969,7 @@ def parseBatchFile(batch_file_name):
     batch_file.close()
 
     return samp2batch
+
 
 def printDataToHTML(grdevices, html_dir, html_out, outline, 
                     samp_start_idx, idx2sample,
@@ -1028,6 +1011,7 @@ def printDataToHTML(grdevices, html_dir, html_out, outline,
     html_out.write(html_outline)
    
     return data_counter + 1 
+
 
 def writeHTMLHeader(html_out, headerList):
     header = "<tr>"

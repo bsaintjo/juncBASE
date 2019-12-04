@@ -16,9 +16,6 @@ import pdb
 import robustats
 import statistics
 
-import rpy2.robjects as robjects
-
-r = robjects.r
 #############
 # CONSTANTS #
 #############
@@ -285,31 +282,18 @@ def getMedianVirtualReferences(excl_incl_vals, total_thresh,
         return "NA", "NA", "NA"
 
     if all_weights:
-        # TODO delete and refactor
-        # virtual_median = "%d;%d" % (int(round(r['weighted.median'](robjects.IntVector(excl_counts),
-        #                                                            robjects.FloatVector(weights))[0])), 
-        #                             int(round(r['weighted.median'](robjects.IntVector(incl_counts),
-        #                                                            robjects.FloatVector(weights))[0])))
-        virtual_median = "%d;%d" % (int(round(robustats.weighted_median(excl_counts, weights))), 
+        virtual_median = "%d;%d" % (int(round(robustats.weighted_median(excl_counts, weights))),
                                     int(round(robustats.weighted_median(incl_counts, weight))))
 
-        # median_total = int(round(r['weighted.median'](robjects.IntVector(total_expressions),
-        #                                               robjects.FloatVector(weights))[0]))
         median_total = int(round(robustats.weighted_median(total_expressions, weights)))
 
-        # median_psi = r['weighted.median'](robjects.FloatVector(psis),
-        #                                   robjects.FloatVector(weights))[0]
         median_psi = robustats.weighted_median(psis, weights)
 
     else:
-        # virtual_median = "%d;%d" % (int(round(r['median'](robjects.IntVector(excl_counts)))), 
-        #                             int(round(r['median'](robjects.IntVector(incl_counts))[0])))
-        virtual_median = "%d;%d" % (int(round(statistics.median(excl_counts))), 
+        virtual_median = "%d;%d" % (int(round(statistics.median(excl_counts))),
                                     int(round(statistics.median(incl_counts))))
-        # median_total = int(round(r['median'](robjects.IntVector(total_expressions))[0]))
         median_total = int(round(statistics.median(total_expressions))
 
-        # median_psi = r['median'](robjects.FloatVector(psis))[0]
         median_psi = statistics.median(psis)
 
     virtual_median_ratio = "%d;%d" % (int(round(median_total*(1.00-median_psi))),
