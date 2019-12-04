@@ -9,13 +9,12 @@
 #
 #   $Id: object.py,v 1.28 2005/06/09 00:00:39 brpreiss Exp $
 #
-
 """
 Provides the Object class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:39 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:39 $"
 __version__ = "$Revision: 1.28 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
@@ -23,19 +22,20 @@ import sys
 from opus7.abstractmethod import abstractmethod
 from opus7.metaclass import Metaclass
 
+
 #{
-class Object(object):
+class Object(object, metaclass=Metaclass):
     """
     Base class from which all objects are derived.
     """
 
-#}@head
+    #}@head
 
-#{
+    #{
     # ...
-#}@tail
+    #}@tail
 
-#{
+    #{
     def __init__(self):
         """
         (Object) -> None
@@ -53,26 +53,24 @@ class Object(object):
         elif isinstance(obj, self.__class__):
             return -obj._compareTo(self)
         else:
-            return cmp(self.__class__.__name__,
-                obj.__class__.__name__)
+            return cmp(self.__class__.__name__, obj.__class__.__name__)
 
     @abstractmethod
-    def _compareTo(self, obj): pass
-#}>a
+    def _compareTo(self, obj):
+        pass
 
-#{
-    __metaclass__ = Metaclass
-#}>b
+    #}>b
 
     @staticmethod
     def main(*argv):
         "Object test program."
-        print Object.main.__doc__
+        print((Object.main.__doc__))
         try:
             object = Object()
-        except TypeError, msg:
-            print "Caught TypeError: %s" % str(msg)
+        except TypeError as msg:
+            print(("Caught TypeError: %s" % str(msg)))
         return 0
+
 
 if __name__ == "__main__":
     sys.exit(Object.main(*sys.argv))

@@ -18,12 +18,12 @@
 
 import sys, getopt, pdb, os
 
-from pysqlite2 import dbapi2 as sqlite
+from sqlite3 import dbapi2 as sqlite
+
 ###########
 #CONSTANTS#
 ###########
 
-    
 ###############
 #END CONSTANTS#
 ###############
@@ -33,233 +33,256 @@ from pysqlite2 import dbapi2 as sqlite
 #CLASSES#
 #########
 def dict_factory(cursor, row):
-		d = {}
-		for idx, col in enumerate(cursor.description):
-			d[col[0]] = row[idx]
-		return d
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+
 class DictCursor(sqlite.Cursor):
-	def __init__(self, *args, **kwargs):
-		sqlite.Cursor.__init__(self, *args, **kwargs)
-		self.row_factory = dict_factory
+    def __init__(self, *args, **kwargs):
+        sqlite.Cursor.__init__(self, *args, **kwargs)
+        self.row_factory = dict_factory
+
 
 class DB:
+    def __init__(self, db_dir="./"):
+        self.db_dir = db_dir
+        if not db_dir.endswith("/"):
+            self.db_dir = db_dir + "/"
 
-	def __init__(self, db_dir="./"):
-		self.db_dir=db_dir
-		if not db_dir.endswith("/"):
-			self.db_dir=db_dir + "/"
+    def __connect(self, database, check_same_thread=True):
+        return sqlite.connect(self.db_dir + database, check_same_thread)
 
-	def __connect(self, database, check_same_thread = True):
-		return sqlite.connect( self.db_dir + database, check_same_thread )	
+    def createDatabase(self, database_name):
+        # Delete previoius database
+        if os.path.exists(self.db_dir + database_name):
+            os.remove(self.db_dir + database_name)
 
-	def createDatabase(self,database_name):
-		# Delete previoius database
-		if os.path.exists(self.db_dir + database_name):
-			os.remove(self.db_dir + database_name)
-			
-		conn = sqlite.connect( self.db_dir + database_name )
-		cursor = conn.cursor()
-	
-		conn.commit()
-		cursor.close()
-		conn.close()
-		
-	def createIndex(self,index_name, table_name, comma_separated_cols,
-					database_name, check_same_thread = True):
-			
-		conn = self.__connect( database_name, check_same_thread )
-		cursor = conn.cursor()
-	
-		create_index = "CREATE INDEX %s ON %s " % (index_name, table_name)
-		create_index += "(%s)" % comma_separated_cols
-		
-		cursor.execute( create_index )
-	
-		conn.commit()
-		cursor.close()
-		conn.close()
+        conn = sqlite.connect(self.db_dir + database_name)
+        cursor = conn.cursor()
 
-	def createTable(self, table_name, create_definition, database,
-                    check_same_thread = True):
-		conn = self.__connect( database, check_same_thread )
-		cursor = conn.cursor()
-	
-		#Delete previous table
-		try:
-			drop_statement = "DROP TABLE IF EXISTS %s" % table_name
-			cursor.execute( drop_statement )
-			conn.commit()
+        conn.commit()
+        cursor.close()
+        conn.close()
 
-		except sqlite.IntegrityError, e:
-			print "Create Table Error %d: %s" % (e.args[0], e.args[1])
+    def createIndex(self,
+                    index_name,
+                    table_name,
+                    comma_separated_cols,
+                    database_name,
+                    check_same_thread=True):
 
-		create_statement = "CREATE TABLE %s (%s)" % (table_name,
-							create_definition)
-		cursor.execute( create_statement )
-		conn.commit()
-		cursor.close()
-		conn.close()
-	
-	def insertIntoTable(self, table_name, column_names, values, database,
-                      val_string=None, check_same_thread = True ):
-		conn = self.__connect( database, check_same_thread )
-		cursor = conn.cursor()
-		
-		if not val_string:
-			val_string_comp = ["?" for n in range(values.count(",")+1)]
-			val_string = ",".join(val_string_comp)
+        conn = self.__connect(database_name, check_same_thread)
+        cursor = conn.cursor()
 
-		insert_statement = "INSERT INTO %s (%s) VALUES (%s)" % (table_name,
-                                                            column_names,
-								  	                                        val_string)
-		try:
-			cursor.execute( insert_statement, values )
-			conn.commit()
-		except sqlite.IntegrityError, e:
-			print "Insert Error %d: %s" % (e.args[0], e.args[1])
-			
-		cursor.close()
-		conn.close()	
+        create_index = "CREATE INDEX %s ON %s " % (index_name, table_name)
+        create_index += "(%s)" % comma_separated_cols
 
-	def insertListIntoTable(self, table_name, column_names, values_list, database,
-                          val_string=None, check_same_thread = True):
-		conn = self.__connect(database, check_same_thread)
-		cursor = conn.cursor()
+        cursor.execute(create_index)
 
-		if not val_string:
-			val_string_comp = ["?" for n in range(values.count(",")+1)]
-			val_string = ",".join(val_string_comp)
+        conn.commit()
+        cursor.close()
+        conn.close()
 
-		insert_statement = "INSERT INTO %s (%s) VALUES (%s)" % (table_name,
-                                                            column_names,
-														                                val_string)
-		try:
-			cursor.executemany( insert_statement, values_list )
-			conn.commit()
-		except sqlite.IntegrityError, e:
-			print "Insert Error %d: %s" % (e.args[0], e.args[1])
-			
-		cursor.close()
-		conn.close()	
+    def createTable(self,
+                    table_name,
+                    create_definition,
+                    database,
+                    check_same_thread=True):
+        conn = self.__connect(database, check_same_thread)
+        cursor = conn.cursor()
 
-	def updateTable(self, table_name, update_statement, database,
-                    check_same_thread = True):
-		conn = self.__connect(database, check_same_thread)
-		cursor = conn.cursor()
+        #Delete previous table
+        try:
+            drop_statement = "DROP TABLE IF EXISTS %s" % table_name
+            cursor.execute(drop_statement)
+            conn.commit()
 
-		try:
-			cursor.execute(update_statement)
-			conn.commit()
-		except sqlite.IntegrityError, e:
-			print "Update Error %d: %s" % (e.args[0], e.args[1])
+        except sqlite.IntegrityError as e:
+            print(("Create Table Error %d: %s" % (e.args[0], e.args[1])))
 
-		cursor.close()
-		conn.close()
-	
-	def getDBRecords_Dict( self, select_statement, database, check_same_thread = True):
-		"""
+        create_statement = "CREATE TABLE %s (%s)" % (table_name,
+                                                     create_definition)
+        cursor.execute(create_statement)
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    def insertIntoTable(self,
+                        table_name,
+                        column_names,
+                        values,
+                        database,
+                        val_string=None,
+                        check_same_thread=True):
+        conn = self.__connect(database, check_same_thread)
+        cursor = conn.cursor()
+
+        if not val_string:
+            val_string_comp = ["?" for n in range(values.count(",") + 1)]
+            val_string = ",".join(val_string_comp)
+
+        insert_statement = "INSERT INTO %s (%s) VALUES (%s)" % (
+            table_name, column_names, val_string)
+        try:
+            cursor.execute(insert_statement, values)
+            conn.commit()
+        except sqlite.IntegrityError as e:
+            print(("Insert Error %d: %s" % (e.args[0], e.args[1])))
+
+        cursor.close()
+        conn.close()
+
+    def insertListIntoTable(self,
+                            table_name,
+                            column_names,
+                            values_list,
+                            database,
+                            val_string=None,
+                            check_same_thread=True):
+        conn = self.__connect(database, check_same_thread)
+        cursor = conn.cursor()
+
+        if not val_string:
+            val_string_comp = ["?" for n in range(values.count(",") + 1)]
+            val_string = ",".join(val_string_comp)
+
+        insert_statement = "INSERT INTO %s (%s) VALUES (%s)" % (
+            table_name, column_names, val_string)
+        try:
+            cursor.executemany(insert_statement, values_list)
+            conn.commit()
+        except sqlite.IntegrityError as e:
+            print(("Insert Error %d: %s" % (e.args[0], e.args[1])))
+
+        cursor.close()
+        conn.close()
+
+    def updateTable(self,
+                    table_name,
+                    update_statement,
+                    database,
+                    check_same_thread=True):
+        conn = self.__connect(database, check_same_thread)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute(update_statement)
+            conn.commit()
+        except sqlite.IntegrityError as e:
+            print(("Update Error %d: %s" % (e.args[0], e.args[1])))
+
+        cursor.close()
+        conn.close()
+
+    def getDBRecords_Dict(self,
+                          select_statement,
+                          database,
+                          check_same_thread=True):
+        """
 		Returns [] if no records exist.
 		"""
-        	#Connect to Database
-        	conn = self.__connect(database, check_same_thread)
+        #Connect to Database
+        conn = self.__connect(database, check_same_thread)
 
-        	conn.row_factory = sqlite.Row
-        	cursor = conn.cursor()
-#	        cursor = conn.cursor(factory=DictCursor)
-		try:
-			cursor.execute ( select_statement )
-			return_result =  cursor.fetchall()
-		
-		except sqlite.IntegrityError, e:
-			print "Get Records Error %d: %s" % (e.args[0], e.args[1])
-			return None
+        conn.row_factory = sqlite.Row
+        cursor = conn.cursor()
+        #	        cursor = conn.cursor(factory=DictCursor)
+        try:
+            cursor.execute(select_statement)
+            return_result = cursor.fetchall()
 
-        	#Close connections
-        	cursor.close()
-        	conn.close()
+        except sqlite.IntegrityError as e:
+            print(("Get Records Error %d: %s" % (e.args[0], e.args[1])))
+            return None
 
-        	return return_result
+#Close connections
+        cursor.close()
+        conn.close()
 
-	def getDBRow_Dict( self, select_statement, database, check_same_thread = True):
-		"""
+        return return_result
+
+    def getDBRow_Dict(self, select_statement, database,
+                      check_same_thread=True):
+        """
 		Returns None if no row exists
 		"""
-                #Connect to Database
-		conn = self.__connect(database, check_same_thread)
+        #Connect to Database
+        conn = self.__connect(database, check_same_thread)
 
-		conn.row_factory = sqlite.Row
-		cursor = conn.cursor()
-#		cursor = conn.cursor(factory=DictCursor)
+        conn.row_factory = sqlite.Row
+        cursor = conn.cursor()
+        #		cursor = conn.cursor(factory=DictCursor)
 
-		try:
-			cursor.execute ( select_statement )
-			return_result =  cursor.fetchone()
-		except sqlite.IntegrityError, e:
-			print "Get Row Error %d: %s" % (e.args[0], e.args[1])
-			return None
-		
-                cursor.close()
-                conn.close()
-                                                                                
-                return return_result
-	
+        try:
+            cursor.execute(select_statement)
+            return_result = cursor.fetchone()
+        except sqlite.IntegrityError as e:
+            print(("Get Row Error %d: %s" % (e.args[0], e.args[1])))
+            return None
+
+        cursor.close()
+        conn.close()
+
+        return return_result
+
 
 #############
 #END CLASSES#
 #############
- 
+
+
 ######
-#MAIN#	
+#MAIN#
 ######
-def main():		
+def main():
 
-	db = DB()
+    db = DB()
 
-	db.createDatabase("lotsOstuff")
+    db.createDatabase("lotsOstuff")
 
-#	db.createTable( "pens", "id INTEGER PRIMARY KEY AUTOINCREMENT, color VARCHAR(10)", "lotsOstuff")
-	db.createTable( "pens", "color VARCHAR(10)", "lotsOstuff")
-	db.insertIntoTable( "pens", "color",('blue',), "lotsOstuff", "?")
-	db.insertIntoTable( "pens", "color", ('red',), "lotsOstuff")
+    #	db.createTable( "pens", "id INTEGER PRIMARY KEY AUTOINCREMENT, color VARCHAR(10)", "lotsOstuff")
+    db.createTable("pens", "color VARCHAR(10)", "lotsOstuff")
+    db.insertIntoTable("pens", "color", ('blue', ), "lotsOstuff", "?")
+    db.insertIntoTable("pens", "color", ('red', ), "lotsOstuff")
 
-	db.insertListIntoTable("pens", "color", [('pink',), 
-                                           ('green',),
-                                           ('black',),
-                                           ('yellow',),
-                                           ('magenta',),
-                                           ('silver',),
-                                           ('gold',),
-                                           ('purple',)],
-                          "lotsOstuff",
-                          "?")
-	select_statement = "SELECT * FROM pens WHERE color=\'blue\'"	
+    db.insertListIntoTable("pens", "color", [('pink', ), ('green', ),
+                                             ('black', ), ('yellow', ),
+                                             ('magenta', ), ('silver', ),
+                                             ('gold', ), ('purple', )],
+                           "lotsOstuff", "?")
+    select_statement = "SELECT * FROM pens WHERE color=\'blue\'"
 
-	pen_record = db.getDBRow_Dict( select_statement, "lotsOstuff" )
+    pen_record = db.getDBRow_Dict(select_statement, "lotsOstuff")
 
-#	print "id=%d" % int(pen_record["id"])
-	print "color=%s" % pen_record["color"]
+    #	print "id=%d" % int(pen_record["id"])
+    print(("color=%s" % pen_record["color"]))
 
-	select_statement2 = "SELECT * FROM pens"
-	
-	pen_record = db.getDBRecords_Dict( select_statement2, "lotsOstuff")
+    select_statement2 = "SELECT * FROM pens"
 
-	print "The pens are:"
-	print pen_record
+    pen_record = db.getDBRecords_Dict(select_statement2, "lotsOstuff")
+
+    print("The pens are:")
+    print(pen_record)
+
 
 ##########
 #END_MAIN#
 ##########
 
+
 ###########
 #FUNCTIONS#
 ###########
-def formatLine( line ):
-	#format line
-	line = line.replace("\r","")
-	line = line.replace("\n","")
-	return line
+def formatLine(line):
+    #format line
+    line = line.replace("\r", "")
+    line = line.replace("\n", "")
+    return line
+
 
 ###############
-#END FUNCTIONS#	
-###############	
+#END FUNCTIONS#
+###############
 if __name__ == "__main__": main()

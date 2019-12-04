@@ -9,17 +9,17 @@
 #
 #   $Id: parent.py,v 1.5 2005/06/09 00:00:39 brpreiss Exp $
 #
-
 """
 Provides the Parent class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:39 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:39 $"
 __version__ = "$Revision: 1.5 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
 from opus7.person import Person
+
 
 #{
 class Parent(Person):
@@ -49,7 +49,9 @@ class Parent(Person):
         Returns a string representation of this parent.
         """
         # ...
-#[
+        #[
         pass
+
+
 #]
 #}>a

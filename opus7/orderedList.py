@@ -9,18 +9,18 @@
 #
 #   $Id: orderedList.py,v 1.19 2005/06/09 00:00:39 brpreiss Exp $
 #
-
 """
 Provides the OrderedList class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:39 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:39 $"
 __version__ = "$Revision: 1.19 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
 from opus7.abstractmethod import abstractmethod
 from opus7.searchableContainer import SearchableContainer
+
 
 #{
 class OrderedList(SearchableContainer):
@@ -36,30 +36,33 @@ class OrderedList(SearchableContainer):
         super(OrderedList, self).__init__()
 
     @abstractmethod
-    def __getitem__(self, i): pass
+    def __getitem__(self, i):
+        pass
 
     @abstractmethod
-    def findPosition(self, obj): pass
-#}>a
+    def findPosition(self, obj):
+        pass
+
+    #}>a
 
     @staticmethod
     def test(list):
         "OrderedList test program."
-        print OrderedList.test.__doc__
+        print((OrderedList.test.__doc__))
         list.insert(1)
         list.insert(2)
         list.insert(3)
         list.insert(4)
-        print list
+        print(list)
         obj = list.find(2)
         list.withdraw(obj)
-        print list
+        print(list)
         position = list.findPosition(3)
         position.insertAfter(5)
-        print list
+        print(list)
         position.insertBefore(6)
-        print list
+        print(list)
         position.withdraw()
-        print list
+        print(list)
         for i in list:
-            print i
+            print(i)

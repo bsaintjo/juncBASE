@@ -9,13 +9,12 @@
 #
 #   $Id: graphicalObject.py,v 1.7 2005/06/09 00:00:39 brpreiss Exp $
 #
-
 """
 Provides the GraphicalObject class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:39 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:39 $"
 __version__ = "$Revision: 1.7 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
@@ -23,16 +22,17 @@ from opus7.object import Object
 from opus7.abstractmethod import abstractmethod
 from opus7.point import Point
 
+
 #{
 class GraphicalObject(Object):
     """
     Base class from which all graphical objects are derived.
     """
 
-#}@head
+    #}@head
 
-#{
-#}@tail
+    #{
+    #}@tail
 
     BACKGROUND_COLOR = 0
     FOREGROUND_COLOR = 1
@@ -41,6 +41,7 @@ class GraphicalObject(Object):
         pass
 
 #{
+
     def __init__(self, center):
         """
         (GraphicalObject, Point) -> None
@@ -74,11 +75,13 @@ class GraphicalObject(Object):
         self.erase()
         self._center = p
         self.draw()
+
+
 #}>a
 
     @staticmethod
     def test(go):
-	"GraphicalObject test program."
-	go.draw()
-	go.moveTo(Point(1,1))
-	go.erase()
+        "GraphicalObject test program."
+        go.draw()
+        go.moveTo(Point(1, 1))
+        go.erase()

@@ -9,17 +9,17 @@
 #
 #   $Id: sparseMatrix.py,v 1.5 2005/06/09 00:00:40 brpreiss Exp $
 #
-
 """
 Provides the SparseMatrix class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:40 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:40 $"
 __version__ = "$Revision: 1.5 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
 from opus7.matrix import Matrix
+
 
 class SparseMatrix(Matrix):
     """

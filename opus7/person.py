@@ -9,15 +9,15 @@
 #
 #   $Id: person.py,v 1.7 2005/06/09 00:00:40 brpreiss Exp $
 #
-
 """
 Provides the Person class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:40 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:40 $"
 __version__ = "$Revision: 1.7 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
+
 
 #{
 class Person(object):
@@ -43,4 +43,6 @@ class Person(object):
         Returns a string representation of this person.
         """
         return str(self._name)
+
+
 #}>a

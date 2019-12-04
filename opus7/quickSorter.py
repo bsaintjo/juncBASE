@@ -9,13 +9,12 @@
 #
 #   $Id: quickSorter.py,v 1.13 2005/06/09 00:00:40 brpreiss Exp $
 #
-
 """
 Provides the QuickSorter class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:40 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:40 $"
 __version__ = "$Revision: 1.13 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
@@ -23,20 +22,21 @@ from opus7.abstractmethod import abstractmethod
 from opus7.sorter import Sorter
 from opus7.straightInsertionSorter import StraightInsertionSorter
 
+
 #{
 class QuickSorter(Sorter):
     """
     Base class from which all QuickSorter classes are derived.
     """
 
-#}@head
+    #}@head
 
-#{
+    #{
 
     # ...
-#}@tail
+    #}@tail
 
-#{
+    #{
     def __init__(self):
         """
         (QuickSorter) -> None
@@ -45,11 +45,13 @@ class QuickSorter(Sorter):
         super(QuickSorter, self).__init__()
 
     @abstractmethod
-    def selectPivot(self): pass
-#}>a
+    def selectPivot(self):
+        pass
 
-#{
-    CUTOFF = 2 # minimum cut-off
+    #}>a
+
+    #{
+    CUTOFF = 2  # minimum cut-off
 
     def quicksort(self, left, right):
         """
@@ -81,6 +83,7 @@ class QuickSorter(Sorter):
 #}>b
 
 #{
+
     def _sort(self):
         """
         (QuickSorter) -> None
@@ -89,4 +92,6 @@ class QuickSorter(Sorter):
         self.quicksort(0, self._n - 1)
         sorter = StraightInsertionSorter()
         sorter.sort(self._array)
+
+
 #}>c

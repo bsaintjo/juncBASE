@@ -9,18 +9,18 @@
 #
 #   $Id: vertex.py,v 1.14 2005/06/09 00:00:41 brpreiss Exp $
 #
-
 """
 Provides the Vertex class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:41 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:41 $"
 __version__ = "$Revision: 1.14 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
 from opus7.abstractmethod import abstractmethod
 from opus7.object import Object
+
 
 #{
 class Vertex(Object):
@@ -36,38 +36,40 @@ class Vertex(Object):
         super(Vertex, self).__init__()
 
     @abstractmethod
-    def getNumber(self): pass
+    def getNumber(self):
+        pass
 
-    number = property(
-        fget = lambda self: self.getNumber())
-
-    @abstractmethod
-    def getWeight(self): pass
-
-    weight = property(
-        fget = lambda self: self.getWeight())
+    number = property(fget=lambda self: self.getNumber())
 
     @abstractmethod
-    def getIncidentEdges(self): pass
+    def getWeight(self):
+        pass
 
-    incidentEdges = property(
-        fget = lambda self: self.getIncidentEdges())
-
-    @abstractmethod
-    def getEmanatingEdges(self): pass
-
-    emanatingEdges = property(
-        fget = lambda self: self.getEmanatingEdges())
+    weight = property(fget=lambda self: self.getWeight())
 
     @abstractmethod
-    def getPredecessors(self): pass
+    def getIncidentEdges(self):
+        pass
 
-    predecessors = property(
-        fget = lambda self: self.getPredecessors())
+    incidentEdges = property(fget=lambda self: self.getIncidentEdges())
 
     @abstractmethod
-    def getSuccessors(self): pass
+    def getEmanatingEdges(self):
+        pass
 
-    successors = property(
-        fget = lambda self: self.getSuccessors())
+    emanatingEdges = property(fget=lambda self: self.getEmanatingEdges())
+
+    @abstractmethod
+    def getPredecessors(self):
+        pass
+
+    predecessors = property(fget=lambda self: self.getPredecessors())
+
+    @abstractmethod
+    def getSuccessors(self):
+        pass
+
+    successors = property(fget=lambda self: self.getSuccessors())
+
+
 #}>a

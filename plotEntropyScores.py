@@ -1,11 +1,10 @@
 #!/lab/64/bin/python
-# plotEntropyScores.py 
+# plotEntropyScores.py
 # Author: Angela Brooks
 # Program Completion Date:
 # Modification Date(s):
 # Copyright (c) 2011, Angela Brooks. anbrooks@gmail.com
 # All rights reserved.
-
 """Will plot a histogram of the Shannon Entropy scores for all junctions (to do).
 
 It will also return a file containing the entropy score for all junctions and
@@ -13,7 +12,7 @@ the offset positions for every read along with the entropy.
 """
 
 import sys
-import optparse 
+import optparse
 import math
 
 import pysam
@@ -24,6 +23,7 @@ matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import numpy
+
 #############
 # CONSTANTS #
 #############
@@ -42,12 +42,13 @@ class OptionParser(optparse.OptionParser):
     Taken from:
     http://www.python.org/doc/2.3/lib/optparse-extending-examples.html
     """
+
     def check_required(self, opt):
         option = self.get_option(opt)
 
         # Assumes the option's 'default' is set to None!
         if getattr(self.values, option.dest) is None:
-            print "%s option not supplied" % option
+            print(("%s option not supplied" % option))
             self.print_help()
             sys.exit(1)
 
@@ -55,14 +56,15 @@ class OptionParser(optparse.OptionParser):
 ###############
 # END CLASSES #
 ###############
- 
+
+
 ########
-# MAIN #	
+# MAIN #
 ########
 def main():
-	
+
     opt_parser = OptionParser()
-   
+
     # Add Options. Required options should have default=None
     opt_parser.add_option("-s",
                           dest="sam_file",
@@ -74,17 +76,18 @@ def main():
                           type="string",
                           help="Prefix name for output files.",
                           default=None)
-    opt_parser.add_option("--known_junctions",
-                          dest="known_junctions",
-                          type="string",
-                          help="""File containing intron coordinates of known/annotated
+    opt_parser.add_option(
+        "--known_junctions",
+        dest="known_junctions",
+        type="string",
+        help="""File containing intron coordinates of known/annotated
                                   introns. If this is given, the entropy scores
                                   will be flagged as (K)nown or (N)ovel
                                   junctions.""",
-                          default=None)
+        default=None)
 
     (options, args) = opt_parser.parse_args()
-	
+
     # validate the command line arguments
     opt_parser.check_required("-s")
     opt_parser.check_required("-o")
@@ -100,16 +103,15 @@ def main():
     known_junctions = None
     if options.known_junctions:
         known_junctions = getForcedJunctions(options.known_junctions)
-    
 
     jcn2JcnInfoDict, jcn2type = parseSAMFile(sam_file, known_junctions, isBam)
 
-#    all_entropies = []
+    #    all_entropies = []
 
     output_file = open(output_name + "_entropy_scores.txt", "w")
     offset_file = open(output_name + "_entropy_offset.txt", "w")
 
-    entropy_scores = []    
+    entropy_scores = []
     if known_junctions:
         novel_entropy_scores = []
 
@@ -119,7 +121,7 @@ def main():
 
         entropy = getShannonIndex(pos2count, totalCount)
 
-#        all_entropies.append(entropy)
+        #        all_entropies.append(entropy)
         if known_junctions:
             output_file.write("%s\t%.3f\t%s\n" % (jcn, entropy, jcn2type[jcn]))
             if jcn2type[jcn] == "N":
@@ -131,7 +133,8 @@ def main():
 
         for upstr_overhang in jcn2JcnInfoDict[jcn].block_list:
             if known_junctions:
-                offset_file.write("%.3f\t%d\t%s\n" % (entropy, upstr_overhang, jcn2type[jcn]))
+                offset_file.write("%.3f\t%d\t%s\n" %
+                                  (entropy, upstr_overhang, jcn2type[jcn]))
             else:
                 offset_file.write("%.3f\t%d\n" % (entropy, upstr_overhang))
 
@@ -140,24 +143,24 @@ def main():
 
     # Create entropy score distribution
     fig = plt.figure()
-    
-    plt.hist(numpy.array(entropy_scores), 
+
+    plt.hist(numpy.array(entropy_scores),
              bins=20,
-             range=[0,10],
+             range=[0, 10],
              histtype='stepfilled',
              normed=True,
-             color = 'b',
-             alpha = 0.25,
+             color='b',
+             alpha=0.25,
              label="junction entropy")
 
     if known_junctions:
-        plt.hist(numpy.array(novel_entropy_scores), 
+        plt.hist(numpy.array(novel_entropy_scores),
                  bins=20,
-                 range=[0,10],
+                 range=[0, 10],
                  histtype='stepfilled',
                  normed=True,
-                 color = 'r',
-                 alpha = 0.25,
+                 color='r',
+                 alpha=0.25,
                  label="junction entropy")
 
     plt.xlabel("Entropy Score")
@@ -165,20 +168,23 @@ def main():
     plt.legend()
 
     fig.savefig("%s_junction_entropy_distribution.png" % output_name)
-			
+
     sys.exit(0)
+
 
 ############
 # END_MAIN #
 ############
 
+
 #############
 # FUNCTIONS #
 #############
 def formatLine(line):
-    line = line.replace("\r","")
-    line = line.replace("\n","")
+    line = line.replace("\r", "")
+    line = line.replace("\n", "")
     return line
+
 
 def getPos2Count(blocklist):
     pos2count = {}
@@ -190,6 +196,7 @@ def getPos2Count(blocklist):
             pos2count[block] = 1
 
     return pos2count
+
 
 def getShannonIndex(pos2countDict, totalCount):
     """
@@ -215,12 +222,13 @@ def getShannonIndex(pos2countDict, totalCount):
 
     return -summation
 
+
 def getType(jcn_str, known_junctions):
     if jcn_str in known_junctions:
         return "K"
 
     return "N"
-    
+
 
 def parseSAMFile(sam_file, known_junctions, isBam):
     jcn2JcnInfo = {}
@@ -259,40 +267,39 @@ def parseSAMFile(sam_file, known_junctions, isBam):
         m_count = cigar.count("M")
 
         # Check if it is a genome read
-        if m_count > 1: # A JUNCTION READ
+        if m_count > 1:  # A JUNCTION READ
             n_count = cigar.count("N")
 
             i_count = cigar.count("I")
             if i_count > 0:
                 if not insertionFlag:
-                    print "Not supporting insertions, yet e.g., %s" % cigar
+                    print(("Not supporting insertions, yet e.g., %s" % cigar))
                 insertionFlag = True
                 continue
 
             d_count = cigar.count("D")
             if d_count > 0:
                 if not deletionFlag:
-                    print "Not supporting deletions, yet e.g., %s" % cigar
+                    print(("Not supporting deletions, yet e.g., %s" % cigar))
                 deletionFlag = True
                 continue
 
             s_count = cigar.count("S")
             if s_count > 0:
                 if not softclipFlag:
-                    print "Not supporting softclipping, yet e.g., %s" % cigar
+                    print(("Not supporting softclipping, yet e.g., %s" % cigar))
                 softclipFlag = True
                 continue
 
             h_count = cigar.count("H")
             if h_count > 0:
                 if not hardclipFlag:
-                    print "Not supporting hardclipping, yet e.g., %s" % cigar
+                    print(("Not supporting hardclipping, yet e.g., %s" % cigar))
                 hardclipFlag = True
                 continue
 
-
             if n_count == 0:
-                print "Expecting a junction read: %s" % cigar
+                print(("Expecting a junction read: %s" % cigar))
                 continue
 
             n_split = cigar.split("N")
@@ -308,7 +315,7 @@ def parseSAMFile(sam_file, known_junctions, isBam):
 
             # Get first intron information which also will be used for the
             # upstream length
-            upstr_len, intron_len = map(int, n_split.pop(0).split("M"))
+            upstr_len, intron_len = list(map(int, n_split.pop(0).split("M")))
             introns_info.append((chr_start, intron_len, None))
             # Updating the chr_start
             chr_start = chr_start + upstr_len + intron_len
@@ -317,12 +324,11 @@ def parseSAMFile(sam_file, known_junctions, isBam):
             # any
             # 3rd element is used in calculating entropy
             for remaining_intron in n_split:
-                exon_len, intron_len = map(int, remaining_intron.split("M"))
+                exon_len, intron_len = list(
+                    map(int, remaining_intron.split("M")))
                 introns_info.append((chr_start + exon_len - upstr_len,
-                                     intron_len,
-                                     chr_start - first_chr_start))
+                                     intron_len, chr_start - first_chr_start))
                 chr_start = chr_start + exon_len + intron_len
-
 
             jcn_tag = None
             jcn_strand = None
@@ -336,7 +342,7 @@ def parseSAMFile(sam_file, known_junctions, isBam):
                     jcn_strand = almost_strand.lstrip(":")
 
                     if jcn_strand != "+" and jcn_strand != "-" and jcn_strand != ".":
-                        print "Error in strand information for: %s" % line
+                        print(("Error in strand information for: %s" % line))
                         sys.exit(1)
 
             # Now insert all introns into jcn dictionary.
@@ -350,15 +356,14 @@ def parseSAMFile(sam_file, known_junctions, isBam):
                 if not jcn_tag:
                     # Create a junction string based on the 1-based junction
                     # coordinate
-                    jcn_str = "%s_%d_%d" % (chr,
-                                            chr_start + upstr_len,
-                                            chr_start + upstr_len + intron_len - 1)
+                    jcn_str = "%s_%d_%d" % (chr, chr_start + upstr_len,
+                                            chr_start + upstr_len +
+                                            intron_len - 1)
                 else:
                     # Need to make multiple jcn_str for each intron
-                    jcn_str = "%s_%s_%d_%d" % (jcn_tag,
-                                               chr,
-                                              chr_start + upstr_len,
-                                              chr_start + upstr_len + intron_len - 1)
+                    jcn_str = "%s_%s_%d_%d" % (jcn_tag, chr, chr_start +
+                                               upstr_len, chr_start +
+                                               upstr_len + intron_len - 1)
 
                 if known_junctions:
                     type = getType(jcn_str, known_junctions)
@@ -366,35 +371,29 @@ def parseSAMFile(sam_file, known_junctions, isBam):
                 if not jcn_strand:
                     jcn_strand = "."
 
-                # Get BED format information 
+                # Get BED format information
                 chromStart = chr_start - 1
                 chromEnd = chromStart + total_len
 
                 # Now add junction to dictionary
                 if jcn_str in jcn2JcnInfo:
-                    jcn2JcnInfo[jcn_str].updateJcnInfo(jcn_str,
-                                                       chr,
-                                                       chromStart, chromEnd,
-                                                       jcn_strand, upstr_len,
-                                                       downstr_len,
-                                                       chr_start + upstr_len,
-                                                       chr_start + upstr_len + intron_len - 1,
-                                                       intron_info[2])
+                    jcn2JcnInfo[jcn_str].updateJcnInfo(
+                        jcn_str, chr, chromStart, chromEnd, jcn_strand,
+                        upstr_len, downstr_len, chr_start + upstr_len,
+                        chr_start + upstr_len + intron_len - 1, intron_info[2])
                 else:
-                    jcn2JcnInfo[jcn_str] = JcnInfo(jcn_str,
-                                                   chr,
-                                                   chromStart, chromEnd,
-                                                   jcn_strand, upstr_len,
-                                                   downstr_len,
-                                                   chr_start + upstr_len,
-                                                   chr_start + upstr_len + intron_len - 1,
-                                                   intron_info[2])
+                    jcn2JcnInfo[jcn_str] = JcnInfo(
+                        jcn_str, chr, chromStart, chromEnd, jcn_strand,
+                        upstr_len, downstr_len, chr_start + upstr_len,
+                        chr_start + upstr_len + intron_len - 1, intron_info[2])
 
                 if known_junctions:
                     jcn2type[jcn_str] = type
 
     return jcn2JcnInfo, jcn2type
+
+
 #################
-# END FUNCTIONS #	
-#################	
+# END FUNCTIONS #
+#################
 if __name__ == "__main__": main()

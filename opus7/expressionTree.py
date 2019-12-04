@@ -9,13 +9,12 @@
 #
 #   $Id: expressionTree.py,v 1.6 2005/06/09 00:00:39 brpreiss Exp $
 #
-
 """
 Provides the ExpressionTree class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:39 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:39 $"
 __version__ = "$Revision: 1.6 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
@@ -23,27 +22,28 @@ from opus7.binaryTree import BinaryTree
 from opus7.stackAsLinkedList import StackAsLinkedList
 from opus7.prePostVisitor import PrePostVisitor
 
+
 #{
 class ExpressionTree(BinaryTree):
     """
     Represents expressions comprised of binary operators.
     """
 
-#}@head
+    #}@head
 
-#{
+    #{
 
     # ...
-#}@tail
+    #}@tail
 
-#{
+    #{
     def __init__(self, word):
         """
         Constructs an expression tree with the given word.
         (ExpressionTree, str) -> None
         """
         super(ExpressionTree, self).__init__(word)
-    
+
     @staticmethod
     def parsePostfix(input):
         """
@@ -66,6 +66,7 @@ class ExpressionTree(BinaryTree):
 #}>a
 
 #{
+
     class InfixVisitor(PrePostVisitor):
         """
         Visits the nodes of an expression tree and constructs
@@ -116,4 +117,6 @@ class ExpressionTree(BinaryTree):
         visitor = self.InfixVisitor()
         self.depthFirstTraversal(visitor)
         return str(visitor)
+
+
 #}>b

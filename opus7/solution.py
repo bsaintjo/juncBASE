@@ -9,18 +9,18 @@
 #
 #   $Id: solution.py,v 1.13 2005/06/09 00:00:40 brpreiss Exp $
 #
-
 """
 Provides the Solution class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:40 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:40 $"
 __version__ = "$Revision: 1.13 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
 from opus7.abstractmethod import abstractmethod
 from opus7.object import Object
+
 
 #{
 class Solution(Object):
@@ -36,32 +36,34 @@ class Solution(Object):
         super(Solution, self).__init__()
 
     @abstractmethod
-    def getIsFeasible(self): pass
+    def getIsFeasible(self):
+        pass
 
-    isFeasible = property(
-        fget = lambda self: self.getIsFeasible())
-
-    @abstractmethod
-    def getIsComplete(self): pass
-
-    isComplete = property(
-        fget = lambda self: self.getIsComplete())
+    isFeasible = property(fget=lambda self: self.getIsFeasible())
 
     @abstractmethod
-    def getObjective(self): pass
+    def getIsComplete(self):
+        pass
 
-    objective = property(
-        fget = lambda self: self.getObjective())
-
-    @abstractmethod
-    def getBound(self): pass
-
-    bound = property(
-        fget = lambda self: self.getBound())
+    isComplete = property(fget=lambda self: self.getIsComplete())
 
     @abstractmethod
-    def getSuccessors(self): pass
+    def getObjective(self):
+        pass
 
-    successors = property(
-        fget = lambda self: self.getSuccessors())
+    objective = property(fget=lambda self: self.getObjective())
+
+    @abstractmethod
+    def getBound(self):
+        pass
+
+    bound = property(fget=lambda self: self.getBound())
+
+    @abstractmethod
+    def getSuccessors(self):
+        pass
+
+    successors = property(fget=lambda self: self.getSuccessors())
+
+
 #}>a

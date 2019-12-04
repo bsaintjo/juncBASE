@@ -9,20 +9,20 @@
 #
 #   $Id: metaclass.py,v 1.17 2005/06/09 00:00:39 brpreiss Exp $
 #
-
 """
 Provides a metaclass for the Object class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:39 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:39 $"
 __version__ = "$Revision: 1.17 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
 import sys
-import sets
+# import sets
 import string
 from opus7.abstractmethod import abstractmethod
+
 
 #{
 class Metaclass(type):
@@ -40,11 +40,11 @@ class Metaclass(type):
         type.__init__(self, name, bases, dict)
         self.__new__ = staticmethod(self.new)
 
-        abstractMethodSet = sets.Set()
+        abstractMethodSet = set()
         reverseMRO = list(self.__mro__)
         reverseMRO.reverse()
         for cls in reverseMRO:
-            for (attrName, attr) in cls.__dict__.iteritems():
+            for (attrName, attr) in list(cls.__dict__.items()):
                 if isinstance(attr, abstractmethod):
                     abstractMethodSet.add(attrName)
                 else:
@@ -64,41 +64,45 @@ class Metaclass(type):
         """
         cls = args[0]
         if len(cls.__abstractmethods__) > 0:
-            msg = "Can't instantiate abstract class %s. " % (
-                cls.__name__)
-            msg += "Missing methods %s." % (
-                str(cls.__abstractmethods__))
-            raise TypeError, msg
+            msg = "Can't instantiate abstract class %s. " % (cls.__name__)
+            msg += "Missing methods %s." % (str(cls.__abstractmethods__))
+            raise TypeError(msg)
         else:
             for base in cls.__mro__:
                 if not isinstance(base, Metaclass) and \
                         base is not type:
                     return base.__new__(*args, **kwargs)
             return object.__new__(*args, **kwargs)
+
+
 #}>a
 
     @staticmethod
     def main(*argv):
         "Metaclass test program."
-        print Metaclass.main.__doc__
+        print((Metaclass.main.__doc__))
 
-        class Good(object):
-            __metaclass__ = Metaclass
+        class Good(object, metaclass=Metaclass):
+            pass
+
         c = Good()
 
         class String(str, Good):
             pass
-        c = String('hello')
-        print c
 
-        class Bad( Good):
+        c = String('hello')
+        print(c)
+
+        class Bad(Good):
             def foo(self):
                 pass
+
             foo = abstractmethod(foo)
+
         try:
             c = Bad()
-        except TypeError, msg:
-            print "Caught TypeError: %s", str(msg)
+        except TypeError as msg:
+            print(("Caught TypeError: %s", str(msg)))
 
         return 0
 

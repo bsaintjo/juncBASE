@@ -9,13 +9,12 @@
 #
 #   $Id: polynomial.py,v 1.22 2005/06/09 00:00:40 brpreiss Exp $
 #
-
 """
 Provides the Polynomial class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:40 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:40 $"
 __version__ = "$Revision: 1.22 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
@@ -25,21 +24,21 @@ from opus7.object import Object
 from opus7.container import Container
 from opus7.visitor import Visitor
 
+
 #{
 class Polynomial(Container):
     """
     Base class from which all polynomial classes are derived."
     """
 
-#}@head
+    #}@head
 
-#{
+    #{
 
     # ...
-#}@tail
+    #}@tail
 
-
-#{
+    #{
     def __init__(self):
         """
         (Polynomail) -> None
@@ -48,16 +47,20 @@ class Polynomial(Container):
         super(Polynomial, self).__init__()
 
     @abstractmethod
-    def addTerm(self, term): pass
+    def addTerm(self, term):
+        pass
 
     @abstractmethod
-    def differentiate(self): pass
+    def differentiate(self):
+        pass
 
     @abstractmethod
-    def __add__(self, polynomial): pass
-#}>a
+    def __add__(self, polynomial):
+        pass
 
-#{
+    #}>a
+
+    #{
     class DifferentiatingVisitor(Visitor):
         """
         Visitor that differentiates the terms it visits.
@@ -77,7 +80,7 @@ class Polynomial(Container):
                 -> None
             Differentiates the given term.
             """
-	    term.differentiate()
+            term.differentiate()
 
     def differentiate(self):
         """
@@ -91,19 +94,20 @@ class Polynomial(Container):
 #}>d
 
 #{
+
     class Term(Object):
         """
         Represents a term in a polynomial.
         """
 
-#}@head
+        #}@head
 
-#{
+        #{
 
         # ...
-#}@tail
+        #}@tail
 
-#{
+        #{
         def __init__(self, coefficient, exponent):
             """
             (Polynomial.Term, double, int) -> None
@@ -119,9 +123,9 @@ class Polynomial(Container):
             """
             assert isinstance(self, term.__class__)
             if self._exponent == term._exponent:
-		return cmp(self._coefficient, term._coefficient)
+                return cmp(self._coefficient, term._coefficient)
             else:
-		return cmp(self._exponent, term._exponent)
+                return cmp(self._exponent, term._exponent)
 
         def differentiate(self):
             """
@@ -136,35 +140,34 @@ class Polynomial(Container):
 #}>b
 
 #{
+
         def __copy__(self):
             """
             (Polynomial.Term) -> Polynomial.Term
             Returns a shallow copy of this term.
             """
-            return Polynomial.Term(
-                self._coefficient, self._exponent)
+            return Polynomial.Term(self._coefficient, self._exponent)
 
         def getCoefficient(self):
             return self._coefficient
 
-        coefficient = property(
-            fget = lambda self: self.getCoefficient())
+        coefficient = property(fget=lambda self: self.getCoefficient())
 
         def getExponent(self):
             return self._exponent
 
-        exponent = property(
-            fget = lambda self: self.getExponent())
+        exponent = property(fget=lambda self: self.getExponent())
 
         def __add__(self, term):
             """
             (Polynomial.Term, Polynomial.Term) -> Polynomial.Term
             Returns the sum of this term and the given term.
             """
-	    assert self._exponent == term._exponent
-            return Polynomial.Term(
-                self._coefficient + term._coefficient,
-                self._exponent)
+            assert self._exponent == term._exponent
+            return Polynomial.Term(self._coefficient + term._coefficient,
+                                   self._exponent)
+
+
 #}>c
 
         def __str__(self):

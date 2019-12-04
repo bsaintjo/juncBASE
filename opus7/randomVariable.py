@@ -9,18 +9,18 @@
 #
 #   $Id: randomVariable.py,v 1.17 2005/06/09 00:00:40 brpreiss Exp $
 #
-
 """
 Provides the RandomVariable class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:40 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:40 $"
 __version__ = "$Revision: 1.17 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
 from opus7.abstractmethod import abstractmethod
 from opus7.object import Object
+
 
 #{
 class RandomVariable(Object):
@@ -36,11 +36,12 @@ class RandomVariable(Object):
         super(RandomVariable, self).__init__()
 
     @abstractmethod
-    def getNext(self): pass
+    def getNext(self):
+        pass
 
-    next = property(
-        fget = lambda self: self.getNext())
-#}>a
+    next = property(fget=lambda self: self.getNext())
+
+    #}>a
 
     def _compareTo(self, obj):
         """
@@ -50,4 +51,3 @@ class RandomVariable(Object):
         """
         assert isinstance(self, obj.__class__)
         raise NotImplementedError
-

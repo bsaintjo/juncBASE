@@ -9,17 +9,17 @@
 #
 #   $Id: depthFirstSolver.py,v 1.4 2005/06/09 00:00:38 brpreiss Exp $
 #
-
 """
 Provides the DepthFirstSolver class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:38 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:38 $"
 __version__ = "$Revision: 1.4 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
 from opus7.solver import Solver
+
 
 #{
 class DepthFirstSolver(Solver):
@@ -45,4 +45,6 @@ class DepthFirstSolver(Solver):
         else:
             for successor in current.successors:
                 self.search(successor)
+
+
 #}>a

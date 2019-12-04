@@ -9,18 +9,18 @@
 #
 #   $Id: breadthFirstSolver.py,v 1.4 2005/06/09 00:00:38 brpreiss Exp $
 #
-
 """
 Provides the BreadthFirstSolver class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:38 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:38 $"
 __version__ = "$Revision: 1.4 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
 from opus7.solver import Solver
 from opus7.queueAsLinkedList import QueueAsLinkedList
+
 
 #{
 class BreadthFirstSolver(Solver):
@@ -50,4 +50,6 @@ class BreadthFirstSolver(Solver):
             else:
                 for soln in current.successors:
                     queue.enqueue(soln)
+
+
 #}>a

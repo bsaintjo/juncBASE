@@ -9,13 +9,12 @@
 #
 #   $Id: polynomialAsOrderedList.py,v 1.10 2005/06/09 00:00:40 brpreiss Exp $
 #
-
 """
 Provides the PolynomialAsOrderedList class.
 """
 
-__author__  = "Bruno R. Preiss, P.Eng."
-__date__    = "$Date: 2005/06/09 00:00:40 $"
+__author__ = "Bruno R. Preiss, P.Eng."
+__date__ = "$Date: 2005/06/09 00:00:40 $"
 __version__ = "$Revision: 1.10 $"
 __credits__ = "Copyright (c) 2003 by Bruno R. Preiss, P.Eng."
 
@@ -23,20 +22,21 @@ from opus7.polynomial import Polynomial
 from opus7.orderedListAsLinkedList import OrderedListAsLinkedList
 from opus7.visitor import Visitor
 
+
 #{
 class PolynomialAsOrderedList(Polynomial):
     """
     Polynomial implemented as an ordered list of terms.
     """
 
-#}@head
+    #}@head
 
-#{
+    #{
 
     # ...
-#}@tail
+    #}@tail
 
-#{
+    #{
     def __init__(self):
         """
         (PolynomialAsOrderedList) -> None
@@ -72,6 +72,8 @@ class PolynomialAsOrderedList(Polynomial):
         Withdraws the given term from this polynomial.
         """
         self._list.withdraw(term)
+
+
 #}>a
 
     def purge(self):

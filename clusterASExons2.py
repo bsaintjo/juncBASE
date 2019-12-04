@@ -5,12 +5,11 @@
 # Modification Date(s):
 # Copyright (c) 2011, Angela Brooks. anbrooks@gmail.com
 # All rights reserved.
-
 """Uses the *_all_AS_event_info.txt to cluster events.
 """
 
 import sys
-import optparse 
+import optparse
 import pdb
 import os
 #############
@@ -19,6 +18,7 @@ import os
 NA = "NA"
 
 NORM_FACTOR = 100
+
 #################
 # END CONSTANTS #
 #################
@@ -33,12 +33,13 @@ class OptionParser(optparse.OptionParser):
     Taken from:
     http://www.python.org/doc/2.3/lib/optparse-extending-examples.html
     """
+
     def check_required(self, opt):
         option = self.get_option(opt)
 
         # Assumes the option's 'default' is set to None!
         if getattr(self.values, option.dest) is None:
-            print "%s option not supplied" % option
+            print(("%s option not supplied" % option))
             self.print_help()
             sys.exit(1)
 
@@ -46,14 +47,15 @@ class OptionParser(optparse.OptionParser):
 ###############
 # END CLASSES #
 ###############
- 
+
+
 ########
-# MAIN #	
+# MAIN #
 ########
 def main():
-	
+
     opt_parser = OptionParser()
-   
+
     # Add Options. Required options should have default=None
     opt_parser.add_option("-d",
                           dest="root_dir",
@@ -83,27 +85,30 @@ def main():
                                   intron retention events are identified in a
                                   different way.""",
                           default=None)
-    opt_parser.add_option("--psi_output_file",
-                          dest="psi_output_file",
-                          type="string",
-                          help="""Optional: Output file that will contain the PSI value
+    opt_parser.add_option(
+        "--psi_output_file",
+        dest="psi_output_file",
+        type="string",
+        help="""Optional: Output file that will contain the PSI value
                                   for every event. It corresponds to the
                                   output_file.""",
-                          default=None)
-    opt_parser.add_option("--psi_left_intron_file",
-                          dest="psi_left_intron_file",
-                          type="string",
-                          help="""Optional: Output file that will contain the PSI value
+        default=None)
+    opt_parser.add_option(
+        "--psi_left_intron_file",
+        dest="psi_left_intron_file",
+        type="string",
+        help="""Optional: Output file that will contain the PSI value
                                   for the left side of intron retention
                                   events.""",
-                          default=None)
-    opt_parser.add_option("--psi_right_intron_file",
-                          dest="psi_right_intron_file",
-                          type="string",
-                          help="""Optional: Output file that will contain the PSI value
+        default=None)
+    opt_parser.add_option(
+        "--psi_right_intron_file",
+        dest="psi_right_intron_file",
+        type="string",
+        help="""Optional: Output file that will contain the PSI value
                                   for the right side of intron retention
                                   events.""",
-                          default=None)
+        default=None)
     opt_parser.add_option("-s",
                           dest="samples",
                           type="string",
@@ -127,7 +132,7 @@ def main():
                           default=None)
 
     (options, args) = opt_parser.parse_args()
-	
+
     # validate the command line arguments
     opt_parser.check_required("-d")
     opt_parser.check_required("-o")
@@ -137,16 +142,16 @@ def main():
 
     root_dir = options.root_dir
 
-    if os.path.exists(root_dir):		
+    if os.path.exists(root_dir):
         root_dir = os.path.abspath(root_dir)
     else:
-        print "Root directory does not exist: %s" % root_dir
+        print(("Root directory does not exist: %s" % root_dir))
         opt_parser.print_help()
         sys.exit(1)
 
     if not root_dir.endswith("/"):
         root_dir += "/"
-    
+
     output_file_name = options.output_file
     left_file_name = options.left_intron_file
     right_file_name = options.right_intron_file
@@ -167,7 +172,7 @@ def main():
     event2sample2counts = {}
 
     # {event:(set(genes), strand)
-    event2genesStrand = {}    
+    event2genesStrand = {}
 
     # {event:sample:(excl, incl)}
     left_intron2sample2counts = {}
@@ -177,50 +182,60 @@ def main():
 
     # Initialize dictionary with first sample
     if which_chr:
-        first_file = open(root_dir + first_sample + "/" + first_sample + "_" + which_chr + 
-                          "/" + first_sample + "_" + which_chr + "_all_AS_event_info.txt")
+        first_file = open(root_dir + first_sample + "/" + first_sample + "_" +
+                          which_chr + "/" + first_sample + "_" + which_chr +
+                          "_all_AS_event_info.txt")
     else:
-        first_file = open(root_dir + first_sample + "/" + first_sample + "_all_AS_event_info.txt")
+        first_file = open(root_dir + first_sample + "/" + first_sample +
+                          "_all_AS_event_info.txt")
 
     for line in first_file:
         line = formatLine(line)
 
         event_key, count_str, genes, strand = getKeyandCount(line)
 
-        event2sample2counts[event_key] = {first_sample:count_str}
-        
+        event2sample2counts[event_key] = {first_sample: count_str}
+
         updateGeneStrand(event2genesStrand, event_key, genes, strand)
 
         if "intron_retention" in line:
-            left_count_str, right_count_str = getIRKeyandCounts(line, lengthNorm)
-            left_intron2sample2counts[event_key] = {first_sample:left_count_str}
-            right_intron2sample2counts[event_key] = {first_sample:right_count_str}
+            left_count_str, right_count_str = getIRKeyandCounts(
+                line, lengthNorm)
+            left_intron2sample2counts[event_key] = {
+                first_sample: left_count_str
+            }
+            right_intron2sample2counts[event_key] = {
+                first_sample: right_count_str
+            }
 
     first_file.close()
-           
+
     # Now populate with the rest of the files.
     for samp in samples:
         if which_chr:
             samp_file = open(root_dir + samp + "/" + samp + "_" + which_chr +
-                             "/" + samp + "_" + which_chr + "_all_AS_event_info.txt") 
+                             "/" + samp + "_" + which_chr +
+                             "_all_AS_event_info.txt")
         else:
-            samp_file = open(root_dir + samp + "/" + samp + "_all_AS_event_info.txt") 
+            samp_file = open(root_dir + samp + "/" + samp +
+                             "_all_AS_event_info.txt")
         for line in samp_file:
             line = formatLine(line)
 
             event_key, count_str, genes, strand = getKeyandCount(line)
-        
+
             if event_key not in event2sample2counts:
-                print "Event from sample, not in dict: %s, %s" % (samp,
-                                                                  event_key)
+                print(("Event from sample, not in dict: %s, %s" %
+                      (samp, event_key)))
                 continue
 
             event2sample2counts[event_key][samp] = count_str
 
             updateGeneStrand(event2genesStrand, event_key, genes, strand)
-        
+
             if "intron_retention" in line:
-                left_count_str, right_count_str = getIRKeyandCounts(line, lengthNorm)
+                left_count_str, right_count_str = getIRKeyandCounts(
+                    line, lengthNorm)
                 left_intron2sample2counts[event_key][samp] = left_count_str
                 right_intron2sample2counts[event_key][samp] = right_count_str
 
@@ -239,15 +254,14 @@ def main():
     header = "#Contains_Novel_or_Only_Known(Annotated)_Junctions\tas_event_type\tgene_name\tchr\tstrand\t"
     header += "exclusion_junctions\tinclusion_junctions\texclusion_exons\t"
     header += "inclusion_exons\tintron-exon_junctions\tneighboring_constitutive_exons\t"
-    header += "%s\t%s\n" % (first_sample,
-                            "\t".join(samples))
+    header += "%s\t%s\n" % (first_sample, "\t".join(samples))
     output_file.write(header)
     if psi_output_file:
         psi_output_file.write(header)
     for event_key in event2sample2counts:
         counts_list = [event2sample2counts[event_key][first_sample]]
         psi_list = [getPSI(event2sample2counts[event_key][first_sample])]
-        
+
         for samp in samples:
             if samp in event2sample2counts[event_key]:
                 counts_list.append(event2sample2counts[event_key][samp])
@@ -257,26 +271,22 @@ def main():
                 psi_list.append(NA)
 
         if "intron_retention" in event_key:
-            if not hasInclusionCounts(event_key, 
-                                      left_intron2sample2counts,
+            if not hasInclusionCounts(event_key, left_intron2sample2counts,
                                       right_intron2sample2counts):
                 skipped_ir_events.add(event_key)
                 continue
 
-        out_key = getOutKey(event_key, 
-                            event2genesStrand[event_key][0],
-                            event2genesStrand[event_key][1],
+        out_key = getOutKey(event_key, event2genesStrand[event_key][0],
+                            event2genesStrand[event_key][1])
 
-        outline = "%s\t%s\n" % (out_key, 
-                                "\t".join(counts_list))
+        outline = "%s\t%s\n" % (out_key, "\t".join(counts_list))
 
         output_file.write(outline)
         if psi_output_file:
-            outline = "%s\t%s\n" % (out_key,
-                                    "\t".join(psi_list))
+            outline = "%s\t%s\n" % (out_key, "\t".join(psi_list))
             psi_output_file.write(outline)
 
-    output_file.close() 
+    output_file.close()
     if psi_output_file:
         psi_output_file.close()
 
@@ -298,30 +308,27 @@ def main():
         for samp in samples:
             if samp in left_intron2sample2counts[event_key]:
                 counts_list.append(left_intron2sample2counts[event_key][samp])
-                psi_list.append(getPSI(left_intron2sample2counts[event_key][samp]))
+                psi_list.append(
+                    getPSI(left_intron2sample2counts[event_key][samp]))
             else:
                 counts_list.append("0;0")
                 psi_list.append(NA)
 
-        out_key = getOutKey(event_key, 
-                            event2genesStrand[event_key][0],
+        out_key = getOutKey(event_key, event2genesStrand[event_key][0],
                             event2genesStrand[event_key][1])
 
-        outline = "%s\t%s\n" % (out_key,
-                                "\t".join(counts_list))
+        outline = "%s\t%s\n" % (out_key, "\t".join(counts_list))
 
         left_file.write(outline)
 
         if psi_left_file:
-            outline = "%s\t%s\n" % (out_key,
-                                    "\t".join(psi_list))
+            outline = "%s\t%s\n" % (out_key, "\t".join(psi_list))
             psi_left_file.write(outline)
 
     left_file.close()
 
     if psi_left_file:
         psi_left_file.close()
-
 
     # Printing right counts
     right_file = open(right_file_name, "w")
@@ -336,67 +343,72 @@ def main():
         if event_key in skipped_ir_events:
             continue
         counts_list = [right_intron2sample2counts[event_key][first_sample]]
-        psi_list = [getPSI(right_intron2sample2counts[event_key][first_sample])]
+        psi_list = [
+            getPSI(right_intron2sample2counts[event_key][first_sample])
+        ]
         for samp in samples:
             if samp in right_intron2sample2counts[event_key]:
                 counts_list.append(right_intron2sample2counts[event_key][samp])
-                psi_list.append(getPSI(right_intron2sample2counts[event_key][samp]))
+                psi_list.append(
+                    getPSI(right_intron2sample2counts[event_key][samp]))
             else:
                 counts_list.append("0;0")
                 psi_list.append(NA)
 
-        out_key = getOutKey(event_key, 
-                            event2genesStrand[event_key][0],
+        out_key = getOutKey(event_key, event2genesStrand[event_key][0],
                             event2genesStrand[event_key][1])
 
-        outline = "%s\t%s\n" % (out_key,
-                                "\t".join(counts_list))
+        outline = "%s\t%s\n" % (out_key, "\t".join(counts_list))
 
         right_file.write(outline)
 
         if psi_right_file:
-            outline = "%s\t%s\n" % (out_key,
-                                    "\t".join(psi_list))
+            outline = "%s\t%s\n" % (out_key, "\t".join(psi_list))
             psi_right_file.write(outline)
 
     right_file.close()
 
     if psi_right_file:
         psi_right_file.close()
-     
+
     sys.exit(0)
+
 
 ############
 # END_MAIN #
 ############
 
+
 #############
 # FUNCTIONS #
 #############
 def formatLine(line):
-    line = line.replace("\r","")
-    line = line.replace("\n","")
+    line = line.replace("\r", "")
+    line = line.replace("\n", "")
     return line
+
 
 def getKeyandCount(line):
     line_list = line.split("\t")
 
-    event_key_list = line_list[0:1] + line_list[2:3] + line_list[4:5] + line_list[6:12]
+    event_key_list = line_list[0:1] + line_list[2:3] + line_list[
+        4:5] + line_list[6:12]
     event_key = "\t".join(event_key_list)
 
     genes = line_list[3].split(",")
     strand = line_list[5]
 
     excl_count = line_list[-2]
-    incl_count = line_list[-1] 
-    
+    incl_count = line_list[-1]
+
     count_str = "%s;%s" % (excl_count, incl_count)
 
     if "-" in count_str:
-        print "Negative value in %s" % line
+        print(("Negative value in %s" % line))
         count_str = "0;0"
 
     return event_key, count_str, genes, strand
+
 
 def getIRKeyandCounts(line, lengthNorm):
     """ 
@@ -407,7 +419,7 @@ def getIRKeyandCounts(line, lengthNorm):
 
     excl_count = line_list[-2]
 
-    left_right_incl_cts = line_list[29] 
+    left_right_incl_cts = line_list[29]
 
     left_incl_count, right_incl_count = left_right_incl_cts.split(";")
 
@@ -416,9 +428,9 @@ def getIRKeyandCounts(line, lengthNorm):
         # normalized by the total length of inclusion isoform. Since I am
         # decoupling the left and right side, the length will be just one
         # junction.
-        left_incl_count = int(left_incl_count)*2
-        right_incl_count = int(right_incl_count)*2
-    
+        left_incl_count = int(left_incl_count) * 2
+        right_incl_count = int(right_incl_count) * 2
+
         left_count_str = "%s;%d" % (excl_count, left_incl_count)
         right_count_str = "%s;%d" % (excl_count, right_incl_count)
     else:
@@ -427,15 +439,17 @@ def getIRKeyandCounts(line, lengthNorm):
 
     return left_count_str, right_count_str
 
+
 def getOutKey(event_key, genes, strand):
     """
     Inserts the gene and strand information into the output events
     """
-    event_list = event_key.split("\t") 
+    event_list = event_key.split("\t")
     event_list.insert(2, ",".join(genes))
     event_list.insert(4, strand)
 
     return "\t".join(event_list)
+
 
 def getPSI(excl_incl_ct_str):
 
@@ -445,27 +459,27 @@ def getPSI(excl_incl_ct_str):
         excl = float(excl_str)
         incl = float(incl_str)
     except:
-        print "Warning:Bad PSI value"
+        print("Warning:Bad PSI value")
         return NA
 
     if excl + incl == 0:
         return NA
 
-    psi = (incl/(incl + excl)) * 100
+    psi = (incl / (incl + excl)) * 100
 
     psi_str = "%.2f" % psi
 
     return psi_str
 
-def hasInclusionCounts(event_key,
-                       left_intron2sample2counts,
+
+def hasInclusionCounts(event_key, left_intron2sample2counts,
                        right_intron2sample2counts):
     leftHasInclusion = False
     rightHasInclusion = False
 
     for samp in left_intron2sample2counts[event_key]:
         count_str = left_intron2sample2counts[event_key][samp]
-        excl_ct, incl_ct = map(int,count_str.split(";"))
+        excl_ct, incl_ct = list(map(int, count_str.split(";")))
 
         if incl_ct > 0:
             leftHasInclusion = True
@@ -473,13 +487,14 @@ def hasInclusionCounts(event_key,
 
     for samp in right_intron2sample2counts[event_key]:
         count_str = right_intron2sample2counts[event_key][samp]
-        excl_ct, incl_ct = map(int,count_str.split(";"))
+        excl_ct, incl_ct = list(map(int, count_str.split(";")))
 
         if incl_ct > 0:
             rightHasInclusion = True
             break
 
     return (leftHasInclusion and rightHasInclusion)
+
 
 def updateGeneStrand(event2genesStrand, event_key, genes, strand):
     """
@@ -488,15 +503,14 @@ def updateGeneStrand(event2genesStrand, event_key, genes, strand):
     {event_key: (set([genes,]),
                  strand)}
     """
-    try:
+    if event_key in event2genesStrand:
         this_strand = event2genesStrand[event_key][1]
         if this_strand != strand:
             event2genesStrand[event_key][1] = "."
     else:
         # Key does not exist
-        event2genesStrand[event_key] = (set([]),
-                                       strand)
-            
+        event2genesStrand[event_key] = (set([]), strand)
+
     genes2update = []
     for gene in genes:
         if gene != "None":
@@ -504,8 +518,8 @@ def updateGeneStrand(event2genesStrand, event_key, genes, strand):
 
     event2genesStrand[event_key][0].update(genes2update)
 
-    
+
 #################
-# END FUNCTIONS #	
-#################	
+# END FUNCTIONS #
+#################
 if __name__ == "__main__": main()
