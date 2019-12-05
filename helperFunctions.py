@@ -270,6 +270,13 @@ def waitForChildren(children_processes, sleeptime=5):
         time.sleep(sleeptime)
 
 
+# TODO Delete
+def launchCMD(cmd):
+    os.system(cmd)
+#    p = Popen(CMD,shell=True)
+#   p.wait()
+
+
 #################
 # END FUNCTIONS #
 #################

@@ -13,11 +13,14 @@ import os
 import pdb
 
 from subprocess import Popen
-from helperFunctions import runCmd, runLSF
+from helperFunctions import launchCMD, runCmd, runLSF
+
+from multiprocessing.pool import ThreadPool
+
 #############
 # CONSTANTS #
 #############
-SHELL = "/bin/tcsh"
+SHELL = "/bin/bash"
 
 BIN_DIR = os.path.realpath(os.path.dirname(sys.argv[0]))
 SCRIPT = "%s/preProcess_getASEventReadCounts_step3.py" % BIN_DIR
@@ -156,6 +159,8 @@ def main():
     # Now go through each sample directory to get to subdirectory, then run
     # command
     ctr = 0  # For num processes
+
+    tp = ThreadPool(num_processes)
     for sample_dir in os.listdir(input_dir):
         if not os.path.isdir(input_dir + "/" + sample_dir):
             continue
@@ -192,23 +197,16 @@ def main():
                 input_dir, this_chr)
             cmd += "--min_overhang %d" % options.min_overhang
 
-            if num_processes:
-                if nice:
-                    cmd = "nice " + cmd
-                if ctr % num_processes == 0:
-                    os.system(cmd)
-                else:
-                    print(cmd)
-                    Popen(cmd, shell=True, executable=SHELL)
-            else:
-                tmp_file = "%s/tmp.txt" % os.curdir
-                runLSF(cmd,
-                       "%s_%s.preProcess_3.bsub.out" % (sample_dir, this_chr),
-                       "%s_%s" % (sample_dir, this_chr),
-                       lsf_queue,
-                       group=lsf_group,
-                       tmp_file_name=tmp_file)
+            if nice:
+                cmd = "nice " + cmd
 
+            print(cmd)
+            sys.stdout.flush()
+            tp.apply_async(launchCMD, (cmd, ))
+
+    tp.close()
+    tp.join()
+    sys.stdout.flush()
     sys.exit(0)
 
 

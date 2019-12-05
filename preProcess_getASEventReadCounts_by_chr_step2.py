@@ -25,8 +25,7 @@ from preProcess_getASEventReadCounts import DEF_BEG_JCN_OVERHANG as DEF_JCN_OVER
 PSEUDO_COUNT = 3
 DEF_CONFIDENCE = 3
 
-SHELL = "/bin/tcsh"
-
+SHELL = "/bin/bash"
 #################
 # END CONSTANTS #
 #################

@@ -13,7 +13,9 @@ import os
 import pdb
 
 from subprocess import Popen
-from helperFunctions import runLSF
+from helperFunctions import launchCMD, runLSF
+
+from multiprocessing.pool import ThreadPool
 
 from createPseudoSample import getChr
 #############
@@ -27,8 +29,7 @@ if not os.path.exists(SCRIPT):
     print("ERROR: createAS_CountTables.py needs to be in the same directory.")
     sys.exit(1)
 
-SHELL = "/bin/tcsh"
-
+SHELL = "/bin/bash"
 #################
 # END CONSTANTS #
 #################
@@ -162,6 +163,8 @@ def main():
     chr_list = getChr(input_dir)
 
     ctr = 0
+
+    tp = ThreadPool(num_processes)
     for this_chr in chr_list:
         files_are_present = False
         expected_out_files = [
@@ -222,12 +225,12 @@ def main():
                    samples.replace(",", "-") + "_" + this_chr, "hour")
             continue
 
-        if ctr % num_processes == 0:
-            os.system(cmd)
-        else:
-            print(cmd)
-            Popen(cmd, shell=True, executable=SHELL)
+        print(cmd)
+        sys.stdout.flush()
+        tp.apply_async(launchCMD, (cmd,))
 
+    tp.close()
+    tp.join()
     sys.exit(0)
 
 

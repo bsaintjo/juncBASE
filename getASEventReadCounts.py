@@ -20,7 +20,7 @@ import pdb
 import os
 import profile
 import pickle
-
+from subprocess import Popen
 from helperFunctions import updateDictOfLists, updateDictOfSets, coordsOverlap, runCmd
 from coord_helperFunctions import getSearchTree, hasOuterContainer, findInternalCoords, hasOverlap
 
@@ -776,8 +776,11 @@ def main():
             first_cmd = cmd + "--reads %s -o %s" % (genome_read_file1,
                                                     mapped_file1_name)
 
-            print(("Running: %s" % first_cmd))
-            os.system(first_cmd)
+            print("Running: %s" % first_cmd)
+            #os.system(first_cmd)
+            temp_p1 = Popen(first_cmd, shell=True)
+            temp_p1.wait()
+
         else:
             mapped_file1_name = coord_counts1
 
@@ -794,8 +797,9 @@ def main():
             second_cmd = cmd + "--reads %s -o %s" % (genome_read_file2,
                                                      mapped_file2_name)
 
-            print(("Running: %s" % second_cmd))
-            os.system(second_cmd)
+            temp_p2 = Popen(second_cmd,shell=True)
+            temp_p2.wait()
+            # os.system(second_cmd)
 
         else:
             mapped_file2_name = coord_counts2
@@ -896,20 +900,21 @@ def main():
         #        cmd += "--method %s" % method
         #        cmd += "-d %s " % txt_db1
         # I would like just raw counts reported
-        #       if DO_LEN_NORM:
-        #           cmd += "--lengthNorm "
-        #       if options.sqlite_db_dir:
-        #           cmd += "--sqlite_db_dir %s" % options.sqlite_db_dir
-        #       else: # Using MySQL database
-        #           if options.passwd == "":
-        #               cmd += "--host %s --user %s" % (options.host,
-        #                                               options.user)
-        #           else:
-        #               cmd += "--host %s --user %s --passwd %s" % (options.host,
-        #                                                           options.user,
-        #                                                           options.passwd)
-        os.system(cmd)
-
+#       if DO_LEN_NORM:
+#           cmd += "--lengthNorm "
+#       if options.sqlite_db_dir:
+#           cmd += "--sqlite_db_dir %s" % options.sqlite_db_dir
+#       else: # Using MySQL database
+#           if options.passwd == "":
+#               cmd += "--host %s --user %s" % (options.host,
+#                                               options.user)
+#           else:
+#               cmd += "--host %s --user %s --passwd %s" % (options.host,
+#                                                           options.user,
+#                                                           options.passwd)
+        # os.system(cmd)
+        temp_p = Popen(cmd, shell=True)
+        temp_p.wait()
         # Add constitutive counts to IR events
         if options.prefix:
             ir_file_name = "%s_all_AS_event_info_irOnly.txt" % prefix
@@ -940,7 +945,9 @@ def main():
 
             if os.path.exists(ir_file):
                 cmd = "cat %s >> %s" % (ir_file, main_file)
-                os.system(cmd)
+                #os.system(cmd)
+                temp_p4 = Popen(cmd,shell=True)
+                temp_p4.wait()
 
     # Sum Totals for inclusion and exclusion isoforms in all_AS_event_info
     # and adjust for paired end counting
