@@ -514,14 +514,14 @@ def main():
                         paired_end_genome_file.write(genome_line)
                     else:
                         if by_chr:
-                            chr2genome_file[chr].write(genome_line)
+                            chr2genome_file[chr].write(str.encode(genome_line))
                         else:
-                            genome_file.write(genome_line)
+                            genome_file.write(str.encode(genome_line))
                 else:
                     if by_chr:
-                        chr2genome_file[chr].write(genome_line)
+                        chr2genome_file[chr].write(str.encode(genome_line))
                     else:
-                        genome_file.write(genome_line)
+                        genome_file.write(str.encode(genome_line))
 
             else:  # A JUNCTION READ
                 n_count = cigar.count("N")
