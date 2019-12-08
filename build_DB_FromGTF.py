@@ -186,6 +186,8 @@ def main():
     initialize = options.initialize
 
     if initialize:
+        if not os.path.exists(options.sqlite_db_dir):
+            os.makedirs(options.sqlite_db_dir)
         db_obj.createDatabase(db_name)
         createAnnotTables(db_obj, db_name)
         sys.exit(0)
