@@ -202,7 +202,7 @@ def main():
 
 # {chr: set[(start, end, strand)])
 #    annotated_introns = getAnnotatedIntronCoords(db, as_db, this_chr)
-    intron_pk_file = open(options.intron_pk_file)
+    intron_pk_file = open(options.intron_pk_file, "rb")
     annotated_introns = pickle.load(intron_pk_file)
     intron_pk_file.close()
 
@@ -211,7 +211,7 @@ def main():
     #    annotated_exons_no_strand,
     #    annotated_exons_by_strand,
     #    annotated_exon_search_tree) = getAnnotatedExonCoords(db, as_db, this_chr)
-    exon_pk_file = open(options.exon_pk_file)
+    exon_pk_file = open(options.exon_pk_file, "rb")
     annotated_exons_by_strand = pickle.load(exon_pk_file)
     exon_pk_file.close()
 
