@@ -873,7 +873,7 @@ def main():
         else:
             annot_intron_pick_name = "annotated_introns.pk"
         intron_pick_file = open(annot_intron_pick_name, "w")
-        pickle.dump(annotated_introns, intron_pick_file)
+        pickle.dump(str.encode(annotated_introns), intron_pick_file)
         intron_pick_file.close()
 
         if prefix:
@@ -881,7 +881,7 @@ def main():
         else:
             annot_exon_pick_name = "annoated_exons_by_strand.pk"
         exon_pick_file = open(annot_exon_pick_name, "w")
-        pickle.dump(annotated_exons_by_strand, exon_pick_file)
+        pickle.dump(str.encode(annotated_exons_by_strand), exon_pick_file)
         exon_pick_file.close()
 
         if options.prefix:
