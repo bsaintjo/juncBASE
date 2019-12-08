@@ -872,16 +872,16 @@ def main():
             annot_intron_pick_name = "%s_annotated_introns.pk" % prefix
         else:
             annot_intron_pick_name = "annotated_introns.pk"
-        intron_pick_file = open(annot_intron_pick_name, "w")
-        pickle.dump(str.encode(annotated_introns), intron_pick_file)
+        intron_pick_file = open(annot_intron_pick_name, "wb")
+        pickle.dump(annotated_introns, intron_pick_file)
         intron_pick_file.close()
 
         if prefix:
             annot_exon_pick_name = "%s_annoated_exons_by_strand.pk" % prefix
         else:
             annot_exon_pick_name = "annoated_exons_by_strand.pk"
-        exon_pick_file = open(annot_exon_pick_name, "w")
-        pickle.dump(str.encode(annotated_exons_by_strand), exon_pick_file)
+        exon_pick_file = open(annot_exon_pick_name, "wb")
+        pickle.dump(annotated_exons_by_strand, exon_pick_file)
         exon_pick_file.close()
 
         if options.prefix:
