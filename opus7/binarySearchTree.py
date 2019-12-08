@@ -22,6 +22,7 @@ import sys
 from opus7.binaryTree import BinaryTree
 from opus7.searchTree import SearchTree
 from opus7.exception import *
+from opus7.cmp import *
 
 
 #{
