@@ -298,11 +298,11 @@ def main():
 
     by_chr = options.by_chr
 
+    tp = ThreadPool(num_processes)
     if by_chr:
         chr_list = getChr(input_dir)
 
         ctr = 0
-        tp = ThreadPool(num_processes)
         for samp in samples:
             # Check for output subdirectory
             samp_dir = output_dir + "/" + samp
