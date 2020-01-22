@@ -405,7 +405,7 @@ def update_len2readFile(len2readFile,
     if isPaired:
         paired_read_set = set([])
 
-    genome_file = gzip.open(genome_file_name, "r")
+    genome_file = gzip.open(genome_file_name, "rt")
 
     for line in genome_file:
         line = formatLine(line)
@@ -420,7 +420,7 @@ def update_len2readFile(len2readFile,
             readFile_name = input_dir + samp + "/tmp_" + repr(
                 read_length) + "_reads.txt.gz"
             len2readFile[read_length] = readFile_name
-            readFile2handle[readFile_name] = gzip.open(readFile_name, "w")
+            readFile2handle[readFile_name] = gzip.open(readFile_name, "wt")
 
             readFile2handle[readFile_name].write(line + "\n")
         if isPaired:
