@@ -376,14 +376,14 @@ def main():
 
             genome_file_name = "%s/%s_%s/%s_%s_genome_reads.txt.gz" % (
                 samp_dir, name, this_chr, name, this_chr)
-            chr2genome_file[this_chr] = gzip.open(genome_file_name, "wb")
+            chr2genome_file[this_chr] = gzip.open(genome_file_name, "wt")
 
     else:
         # Creating output files.
         junction_bed_file_name = "%s%s_junctions.bed" % (out_dir, name)
         junction_bed_file = open(junction_bed_file_name, "w")
         genome_file_name = "%s%s_genome_reads.txt.gz" % (out_dir, name)
-        genome_file = gzip.open(genome_file_name, "wb")
+        genome_file = gzip.open(genome_file_name, "wt")
 
         # Paired-end reads exist.
         if paired_end_exists:

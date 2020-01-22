@@ -144,7 +144,7 @@ def main():
     isSam = False
     if options.read_file:
         if options.read_file.endswith(".gz"):
-            read_file = gzip.open(options.read_file, "rb")
+            read_file = gzip.open(options.read_file, "rt")
         else:
             read_file = open(options.read_file)
     else:

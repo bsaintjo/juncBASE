@@ -346,7 +346,7 @@ def main():
     junction_bed_file_name = "%s%s_junctions.bed" % (out_dir, name)
     junction_bed_file = open(junction_bed_file_name, "w")
     genome_file_name = "%s%s_genome_reads.txt.gz" % (out_dir, name)
-    genome_file = gzip.open(genome_file_name, "wb")
+    genome_file = gzip.open(genome_file_name, "wt")
 
     # Paired-end reads exist.
     if paired_end_exists:

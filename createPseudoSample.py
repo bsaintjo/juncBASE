@@ -199,8 +199,8 @@ def main():
             print(("Missing file %s" % genome_file))
             sys.exit(1)
 
-        genome_fh = gzip.open(genome_file, "rb")
-        pseudo_fh = gzip.open(pseudo_genome_file, "wb")
+        genome_fh = gzip.open(genome_file, "rt")
+        pseudo_fh = gzip.open(pseudo_genome_file, "wt")
 
         line_ctr = 0
         for line in genome_fh:
@@ -225,8 +225,8 @@ def main():
                 print(("Missing file %s" % genome_file))
                 sys.exit(1)
 
-            genome_fh = gzip.open(genome_file, "rb")
-            pseudo_fh = gzip.open(pseudo_file, "wb")
+            genome_fh = gzip.open(genome_file, "rt")
+            pseudo_fh = gzip.open(pseudo_file, "wt")
 
             line_ctr = 0
             for line in genome_fh:
