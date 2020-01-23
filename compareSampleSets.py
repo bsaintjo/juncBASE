@@ -254,7 +254,7 @@ def main():
         samp2batch = parseBatchFile(options.samp2batch_file)
 
     # TODO Disable HTML output for now
-    html_out_dir = options.html_out_dir
+    html_out_dir = False
     if html_out_dir:
         print("HTML output has been disabled at this time", file=sys.stderr)
         html_out_dir = False
