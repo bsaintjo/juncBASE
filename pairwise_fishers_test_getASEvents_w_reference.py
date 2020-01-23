@@ -17,7 +17,7 @@ import os
 
 import robustats
 import statistics
-import scipy
+import scipy.stats
 from statsmodels.stats import multitest
 
 from helperFunctions import updateDictOfLists
