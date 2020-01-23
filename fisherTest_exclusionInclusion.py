@@ -93,7 +93,7 @@ def main():
         sys.exit(1)
 
     # Map correction names into those used by statsmodels
-    method_map = {"BH": "fdr_h", "bonferroni": "bonferroni"}
+    method_map = {"BH": "fdr_bh", "bonferroni": "bonferroni"}
     method = method_map[options.method]
 
     filter = options.filter

@@ -314,7 +314,7 @@ def main():
         opt_parser.print_help()
         sys.exit(1)
 
-    method_map = {"BH": "fdr_h", "bonferroni": "bonferroni"}
+    method_map = {"BH": "fdr_bh", "bonferroni": "bonferroni"}
     method = method_map[method]
 
     which_test = options.which_test

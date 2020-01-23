@@ -388,7 +388,7 @@ def main():
         opt_parser.print_help()
         sys.exit(1)
 
-    method_map = {"BH": "fdr_h", "bonferroni": "bonferroni"}
+    method_map = {"BH": "fdr_bh", "bonferroni": "bonferroni"}
     method = method_map[options.method]
 
     # {event_type:[pval]}
