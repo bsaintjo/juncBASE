@@ -463,10 +463,10 @@ def main():
 
             if idx2sample[i] in sample_set1:
                 if event2col2psi[event][i] != NA:
-                    set1_psis.append(event2col2psi[event][i])
+                    set1_psis.append(float(event2col2psi[event][i]))
             elif idx2sample[i] in sample_set2:
                 if event2col2psi[event][i] != NA:
-                    set2_psis.append(event2col2psi[event][i])
+                    set2_psis.append(float(event2col2psi[event][i]))
 
         if as_only:
             if (float(total_samples - na_count) / total_samples) < PROP_NON_NA:
@@ -680,10 +680,12 @@ def main():
         if as_only:
             event_type2adjusted_pvals[event_type] = list(
                 event_type2pvals[event_type])
-        else:
+        elif event_type2pvals[event_type]:
             event_type2adjusted_pvals[event_type] = list(
                 multitest.multipletests(event_type2pvals[event_type],
                                         method=method)[1])
+        else:
+            event_type2adjusted_pvals[event_type] = []
 
     # Now go through all events and print out pvals
     all_psi_output.write(header)
