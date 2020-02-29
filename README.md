@@ -40,6 +40,10 @@ Pairwise Fisher's Exact test with a virtual reference sample
 Differential splicing between two groups of samples
 "Percent Spliced In" (PSI) output tables
 ```
+## TODO
+getASEventReadCounts.py
+- ERROR_LOG not set in certain cases
+
 ## What is JuncBASE?
 
 JuncBASE (Junction-Based Analysis of Splicing Events) is used to identify and classify alternative splicing events from RNA-Seq data.
